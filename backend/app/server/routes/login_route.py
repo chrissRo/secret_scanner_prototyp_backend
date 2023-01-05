@@ -1,9 +1,8 @@
+from app.server.auth.auth import auth
+from app.server.models.user_models.user import ErrorResponseModel, ResponseModel
 from fastapi import APIRouter
 from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from app.server.auth.auth import auth
-from app.server.models.user_models.user import ErrorResponseModel, ResponseModel
-from app.server.routes import user_route
 
 router = APIRouter()
 
@@ -15,7 +14,6 @@ router = APIRouter()
 @router.post('/')
 async def get_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await auth.authenticate_user(username=form_data.username, password=form_data.password)
-    print(user.username)
     if user and user.active:
         return {
             "access_token": auth.create_access_token(
