@@ -28,6 +28,11 @@ async def retrieve_findings(findings_ids: list) -> list:
 async def retrieve_single_finding(finding_id: str) -> FindingModel:
     return await findings_collection.find_one({'_id': finding_id})
 
+
+async def retrieve_overview_data_count() -> dict:
+    return {
+        'total_number_of_docs': await findings_collection.count_documents(),
+    }
 #####################################
 # PUT
 #####################################

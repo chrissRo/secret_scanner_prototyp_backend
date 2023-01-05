@@ -49,6 +49,13 @@ def ResponseModel(data, message):
         "message": message,
     }
 
+# 'repositoryName':'', 'repositoryPath', 'lastScan', 'numberOfFindingsInDB
+def OverviewResponseModel(data: [{}], message):
+    return {
+        "data": data,
+        "code": 200,
+        "message": message
+    }
 
 def ErrorResponseModel(error, code, message):
     return {

@@ -3,7 +3,7 @@ from fastapi.params import Body
 
 from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
-    retrieve_single_finding
+    retrieve_single_finding, retrieve_overview_data_count
 from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, UpdateFindingModel
 
 router = APIRouter()
@@ -36,6 +36,23 @@ async def get_single_finding(finding_id: str, token=Depends(auth.oauth2scheme)):
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
+@router.get('/finding/overview', response_description='Get overview-data to all findings')
+async def get_finding_overview(token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        pass
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
+
+@router.get('/finding/count', response_description='Get counted overview-data to all findings')
+async def get_finding_overview_count(token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        data_count = await retrieve_overview_data_count()
+        if data_count:
+            return ResponseModel(data_count, 'Data count retrieved successfully')
+        else:
+            ErrorResponseModel('An error occurred.', 500, 'Could not calculate data count')
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 #####################################
 # PUT
 #####################################
