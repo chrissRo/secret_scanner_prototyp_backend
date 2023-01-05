@@ -1,3 +1,5 @@
+import json
+
 from fastapi.encoders import jsonable_encoder
 from ..database import findings_collection
 # https://stackoverflow.com/questions/71467630/fastapi-issues-with-mongodb-typeerror-objectid-object-is-not-iterable
@@ -29,14 +31,16 @@ async def retrieve_single_finding(finding_id: str) -> FindingModel:
     return await findings_collection.find_one({'_id': finding_id})
 
 async def retrieve_overview_data() -> list:
-    print("here")
-    pipeline = [{"$group": {"_id": "$repositoryName"}}]
-    async for group in findings_collection.aggregate(pipeline):
-        print("Group:")
-        print(group)
+    async for repo in findings_collection.aggregate([{"$group": {"_id": "$repositoryName"}}]):
+        print(repo['_id'])
+        # now we have the distinc repo-names
+        # and we can select data to each repository by name
+        #repo_data = await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).to_list(length=None)
+        # get only latest scan
+        repo_data = await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).sort('scanEndTime', -1).limit(1).to_list(length=None)
+        print(repo_data)
 
 async def retrieve_overview_data_count() -> dict:
-    #total_number_of_docs = await findings_collection.aggregate([{"$count": "myCount"}]).to_list(length=None)
     async for total_number_of_docs in findings_collection.aggregate([{"$count": "total_number_of_documents"}]):
         print(total_number_of_docs)
         return total_number_of_docs
