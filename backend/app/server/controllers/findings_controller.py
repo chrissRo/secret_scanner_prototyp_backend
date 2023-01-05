@@ -28,12 +28,20 @@ async def retrieve_findings(findings_ids: list) -> list:
 async def retrieve_single_finding(finding_id: str) -> FindingModel:
     return await findings_collection.find_one({'_id': finding_id})
 
+async def retrieve_overview_data() -> list:
+    print("here")
+    pipeline = [{"$group": {"_id": "$repositoryName"}}]
+    async for group in findings_collection.aggregate(pipeline):
+        print("Group:")
+        print(group)
 
 async def retrieve_overview_data_count() -> dict:
-    return {
-        'total_number_of_docs': await findings_collection.count_documents(),
-    }
-#####################################
+    #total_number_of_docs = await findings_collection.aggregate([{"$count": "myCount"}]).to_list(length=None)
+    async for total_number_of_docs in findings_collection.aggregate([{"$count": "total_number_of_documents"}]):
+        print(total_number_of_docs)
+        return total_number_of_docs
+
+###########################
 # PUT
 #####################################
 
