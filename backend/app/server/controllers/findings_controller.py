@@ -38,7 +38,7 @@ async def retrieve_overview_data() -> list:
         #repo_data = await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).to_list(length=None)
         # get only latest scan
 
-        overview.append(await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).sort('scanEndTime', -1).limit(1).to_list(length=None))
+        overview.append((await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryName': 1, 'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).sort('scanEndTime', -1).limit(1).to_list(length=None))[0])
 
     return overview
 
@@ -50,14 +50,13 @@ async def retrieve_overview_data_count() -> dict:
 
     }
     async for total_number_of_docs in findings_collection.aggregate([{"$count": "total_number_of_documents"}]):
-        print(total_number_of_docs)
-        data_count['total_number_of_documents'] = total_number_of_docs
-    async for repo_count in findings_collection.aggregate([{'$group': {'_id': '$repositoryName', 'count': {'$count': {}}}}]):
 
+        data_count['total_number_of_documents'] = total_number_of_docs['total_number_of_documents']
+    async for repo_count in findings_collection.aggregate([{'$group': {'_id': '$repositoryName', 'count': {'$count': {}}}}]):
         data_count['documents_per_repository'].append(repo_count)
     distinct_repos = await findings_collection.distinct('repositoryName')
     data_count['total_number_of_distinct_repos'] = len(distinct_repos)
-
+    print(data_count)
     return data_count
 
 ###########################

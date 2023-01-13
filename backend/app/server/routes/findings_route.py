@@ -32,7 +32,7 @@ async def get_finding_overview_count(token=Depends(auth.oauth2scheme)):
 async def get_finding_overview(token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         data = await retrieve_overview_data()
-        return ResponseModel(jsonable_encoder(data), "Data retrieved successfully")
+        return SimpleResponseModel(jsonable_encoder(data), "Data retrieved successfully")
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
