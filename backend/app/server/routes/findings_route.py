@@ -7,7 +7,8 @@ from fastapi.params import Body
 from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
     retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data
-from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, UpdateFindingModel
+from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, UpdateFindingModel, \
+    SimpleResponseModel
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ async def get_finding_overview_count(token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         data_count = await retrieve_overview_data_count()
         if data_count:
-            return ResponseModel(data_count, 'Data count retrieved successfully')
+            return SimpleResponseModel(data_count, 'Data count retrieved successfully')
         else:
             ErrorResponseModel('An error occurred.', 500, 'Could not calculate data count')
     else:
@@ -31,7 +32,7 @@ async def get_finding_overview_count(token=Depends(auth.oauth2scheme)):
 async def get_finding_overview(token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         data = await retrieve_overview_data()
-        return ResponseModel(jsonable_encoder(data), "läuft")
+        return ResponseModel(jsonable_encoder(data), "Data retrieved successfully")
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
