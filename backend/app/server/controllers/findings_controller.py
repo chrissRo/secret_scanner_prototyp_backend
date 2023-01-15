@@ -38,7 +38,14 @@ async def retrieve_overview_data() -> list:
         #repo_data = await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).to_list(length=None)
         # get only latest scan
 
-        overview.append((await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryName': 1, 'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).sort('scanEndTime', -1).limit(1).to_list(length=None))[0])
+        overview.append((await findings_collection.find({
+            "repositoryName": repo['_id']},
+            {'repositoryName': 1,
+             'repositoryPath': 1,
+             'scanEndTime': 1,
+             'scannerType': 1,
+             'scannerVersion': 1
+             }).sort('scanEndTime', -1).limit(1).to_list(length=None))[0])
 
     return overview
 
