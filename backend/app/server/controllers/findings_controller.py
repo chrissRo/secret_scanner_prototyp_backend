@@ -57,13 +57,13 @@ async def retrieve_overview_data_count() -> dict:
 
     }
     async for total_number_of_docs in findings_collection.aggregate([{"$count": "total_number_of_documents"}]):
-
         data_count['total_number_of_documents'] = total_number_of_docs['total_number_of_documents']
+
     async for repo_count in findings_collection.aggregate([{'$group': {'_id': '$repositoryName', 'count': {'$count': {}}}}]):
         data_count['documents_per_repository'].append(repo_count)
+
     distinct_repos = await findings_collection.distinct('repositoryName')
     data_count['total_number_of_distinct_repos'] = len(distinct_repos)
-    print(data_count)
     return data_count
 
 ###########################
