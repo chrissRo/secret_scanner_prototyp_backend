@@ -87,7 +87,6 @@ async def retrieve_overview_data_count_for_repository(repository_id: str) -> dic
                      {'falsePositive.justification': ''}]
         })
     }
-
     return data_count
 
 ###########################

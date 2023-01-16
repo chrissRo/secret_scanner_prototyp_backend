@@ -75,9 +75,9 @@ async def get_single_finding(finding_id: str, token=Depends(auth.oauth2scheme)):
 @router.get('/repository/{repository_id}', response_description='Get all findings for repository by its id')
 async def get_repository_findings(repository_id: str, token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
-        finding = await retrieve_all_findings_for_repository(repository_id=repository_id)
-        if finding:
-            return ResponseModel(finding, 'All findings for "{}" retrieved successfully.'.format(repository_id))
+        findings = await retrieve_all_findings_for_repository(repository_id=repository_id)
+        if findings:
+            return SimpleResponseModel(findings, 'All findings for "{}" retrieved successfully.'.format(repository_id))
         else:
             ErrorResponseModel('An error occurred.', 500, 'Could not retrieve findings for {}'.format(repository_id))
     else:
