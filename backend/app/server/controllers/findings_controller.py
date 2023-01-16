@@ -17,8 +17,6 @@ async def retrieve_all_findings() -> list:
         findings.append(finding)
     return findings
 
-# get data to known ids
-# Todo weitere filter-möglichkeiten, wie zum Beispiel scan-date oder creation-date
 # oder nur hinterlegte false-positive
 async def retrieve_findings(findings_ids: list) -> list:
     findings = []
@@ -29,6 +27,14 @@ async def retrieve_findings(findings_ids: list) -> list:
 # get single finding
 async def retrieve_single_finding(finding_id: str) -> FindingModel:
     return await findings_collection.find_one({'_id': finding_id})
+
+# get all findings for given repo-id/name
+async def retrieve_all_findings_for_repository(repository_id: str) -> list:
+    findings = []
+
+    async for finding in findings_collection.find({'repositoryName': repository_id}):
+        findings.append(finding)
+    return findings
 
 async def retrieve_overview_data() -> list:
     overview = []
@@ -54,8 +60,8 @@ async def retrieve_overview_data_count() -> dict:
         'total_number_of_documents': 0,
         'total_number_of_distinct_repos': 0,
         'documents_per_repository': []
-
     }
+
     async for total_number_of_docs in findings_collection.aggregate([{"$count": "total_number_of_documents"}]):
         data_count['total_number_of_documents'] = total_number_of_docs['total_number_of_documents']
 
@@ -64,6 +70,24 @@ async def retrieve_overview_data_count() -> dict:
 
     distinct_repos = await findings_collection.distinct('repositoryName')
     data_count['total_number_of_distinct_repos'] = len(distinct_repos)
+    return data_count
+
+async def retrieve_overview_data_count_for_repository(repository_id: str) -> dict:
+    data_count = {
+        'total_number_of_documents': await findings_collection.count_documents({'repositoryName': repository_id}),
+        'total_number_of_false_positives': await findings_collection.count_documents({
+            '$and': [{'repositoryName': repository_id}, {'falsePositive.isFalsePositive': True}]
+        }),
+        'total_number_of_true_positives': await findings_collection.count_documents({
+            '$and': [{'repositoryName': repository_id}, {'falsePositive.isFalsePositive': False}]
+        }),
+        'total_number_of_todos': await findings_collection.count_documents({
+            '$and': [{'repositoryName': repository_id},
+                     {'falsePositive.change_date': '1900-01-01 00:00:00.000000'},
+                     {'falsePositive.justification': ''}]
+        })
+    }
+
     return data_count
 
 ###########################

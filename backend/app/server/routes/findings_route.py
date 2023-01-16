@@ -6,7 +6,8 @@ from fastapi.params import Body
 
 from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
-    retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data
+    retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data, \
+    retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository
 from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, UpdateFindingModel, \
     SimpleResponseModel
 
@@ -17,7 +18,7 @@ router = APIRouter()
 # GET
 #####################################
 
-@router.get('/count', response_description='Get counted overview-data to all findings')
+@router.get('/count', response_description='Get counted overview-data for all findings')
 async def get_finding_overview_count(token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         data_count = await retrieve_overview_data_count()
@@ -25,6 +26,17 @@ async def get_finding_overview_count(token=Depends(auth.oauth2scheme)):
             return SimpleResponseModel(data_count, 'Data count retrieved successfully')
         else:
             ErrorResponseModel('An error occurred.', 500, 'Could not calculate data count')
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
+
+@router.get('/repository/{repository_id}/count', response_description='Get counted overview-data for given repository')
+async def get_finding_overview_count(repository_id: str, token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        data_count = await retrieve_overview_data_count_for_repository(repository_id)
+        if data_count:
+            return SimpleResponseModel(data_count, 'Data count for repository "{}" retrieved successfully'.format(repository_id))
+        else:
+            ErrorResponseModel('An error occurred.', 500, 'Could not calculate data count for {}'.format(repository_id))
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
@@ -53,9 +65,21 @@ async def get_single_finding(finding_id: str, token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         finding = await retrieve_single_finding(finding_id=finding_id)
         if finding:
-            return ResponseModel(finding, 'Finding {} retrieved successfully.'.format(finding_id))
+            return ResponseModel(finding, 'Finding "{}" retrieved successfully.'.format(finding_id))
         else:
-            ErrorResponseModel('An error occurred.', 500, 'Could not retrieve finding {}')
+            ErrorResponseModel('An error occurred.', 500, 'Could not retrieve finding {}'.format(finding_id))
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
+
+
+@router.get('/repository/{repository_id}', response_description='Get all findings for repository by its id')
+async def get_repository_findings(repository_id: str, token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        finding = await retrieve_all_findings_for_repository(repository_id=repository_id)
+        if finding:
+            return ResponseModel(finding, 'All findings for "{}" retrieved successfully.'.format(repository_id))
+        else:
+            ErrorResponseModel('An error occurred.', 500, 'Could not retrieve findings for {}'.format(repository_id))
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
@@ -70,8 +94,8 @@ async def put_false_positive(finding_id: str, update_finding_model: UpdateFindin
 
         if update_result.modified_count == 1:
             finding = await retrieve_single_finding(finding_id=finding_id)
-            return ResponseModel(finding, 'Finding updated successfully')
-        return ErrorResponseModel('An error occurred.', 500, 'Could not update finding {}'.format(finding_id))
+            return ResponseModel(finding, 'Finding "{}" updated successfully'.format(finding_id))
+        return ErrorResponseModel('An error occurred.', 500, 'Could not update finding "{}"'.format(finding_id))
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
