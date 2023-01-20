@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Union
-from pydantic import BaseModel, Field, DirectoryPath, validator
+from pydantic import BaseModel, Field, DirectoryPath, validator, StrictBool
 
 from utils.PyObjectId import PyObjectId
 from app.server.models.finding_models.gitleaks_raw_result import GitleaksRawResultModel
@@ -19,6 +19,7 @@ class FindingModel(BaseModel):
     scanStartTime: datetime = Field(...)
     scanEndTime: datetime = Field(...)
     save_date: datetime = Field(...)
+    isFavorite: StrictBool = False
     resultRaw: Union[GitleaksRawResultModel] = Field(...)
     falsePositive: FalsePositiveModel = Field(...)
 
