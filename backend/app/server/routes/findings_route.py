@@ -90,7 +90,6 @@ async def get_repository_findings(repository_id: str, token=Depends(auth.oauth2s
 @router.put('/{finding_id}', response_description='Update false-positive-assignment')
 async def put_false_positive(finding_id: str, update_finding_model: UpdateFindingModelFalsePositive = Body(...), token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
-        print(update_finding_model)
         update_result = await set_false_positive(finding_id=finding_id, update_false_positive=update_finding_model)
 
         if update_result.modified_count == 1:
