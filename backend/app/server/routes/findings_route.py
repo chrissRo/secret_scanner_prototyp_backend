@@ -9,7 +9,7 @@ from app.server.controllers.findings_controller import retrieve_all_findings, se
     retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data, \
     retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository
 from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, \
-    SimpleResponseModel, UpdateFindingModelFalsePositive
+    SimpleResponseModel, UpdateFindingModelFalsePositive, UpdateResponseModel
 
 router = APIRouter()
 
@@ -94,7 +94,7 @@ async def put_false_positive(finding_id: str, update_finding_model: UpdateFindin
 
         if update_result.modified_count == 1:
             finding = await retrieve_single_finding(finding_id=finding_id)
-            return ResponseModel(finding, 'Finding "{}" updated successfully'.format(finding_id))
+            return UpdateResponseModel(finding, 'Finding "{}" updated successfully'.format(finding_id))
         return ErrorResponseModel('An error occurred.', 500, 'Could not update finding "{}"'.format(finding_id))
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')

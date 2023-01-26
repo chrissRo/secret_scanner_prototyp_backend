@@ -60,6 +60,13 @@ def ResponseModel(data, message):
         "message": message,
     }
 
+def UpdateResponseModel(data, message):
+    return {
+        "data": data,
+        "code": 200,
+        "message": message,
+    }
+
 def SimpleResponseModel(data, message):
     return {
         "data": data,

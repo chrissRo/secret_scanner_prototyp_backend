@@ -27,7 +27,7 @@ class UpdateFalsePositive(BaseModel):
     @validator('justification')
     def false_positive_needs_justification(cls, value):
         if value == '' or value == InitialModelValue.JUSTIFICATION:
-            raise ValueError('Please provide a reason for change the falsePositive-Status')
+            raise ValueError('Please provide a justification for changing the falsePositive-Status')
         else:
             return value
 

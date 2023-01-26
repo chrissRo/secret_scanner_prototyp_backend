@@ -95,5 +95,4 @@ async def retrieve_overview_data_count_for_repository(repository_id: str) -> dic
 
 # update false-positive
 async def set_false_positive(finding_id: str, update_false_positive: UpdateFindingModelFalsePositive):
-        print(update_false_positive)
         return await findings_collection.update_one({'_id': finding_id}, {'$set': jsonable_encoder(update_false_positive)})
