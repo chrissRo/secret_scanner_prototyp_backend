@@ -8,8 +8,8 @@ from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
     retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data, \
     retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository
-from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, UpdateFindingModel, \
-    SimpleResponseModel
+from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, \
+    SimpleResponseModel, UpdateFindingModelFalsePositive
 
 router = APIRouter()
 
@@ -88,8 +88,9 @@ async def get_repository_findings(repository_id: str, token=Depends(auth.oauth2s
 #####################################
 
 @router.put('/{finding_id}', response_description='Update false-positive-assignment')
-async def put_false_positive(finding_id: str, update_finding_model: UpdateFindingModel = Body(...), token=Depends(auth.oauth2scheme)):
+async def put_false_positive(finding_id: str, update_finding_model: UpdateFindingModelFalsePositive = Body(...), token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
+        print(update_finding_model)
         update_result = await set_false_positive(finding_id=finding_id, update_false_positive=update_finding_model)
 
         if update_result.modified_count == 1:
@@ -98,5 +99,4 @@ async def put_false_positive(finding_id: str, update_finding_model: UpdateFindin
         return ErrorResponseModel('An error occurred.', 500, 'Could not update finding "{}"'.format(finding_id))
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
-
 
