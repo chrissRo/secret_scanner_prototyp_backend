@@ -7,9 +7,9 @@ from fastapi.params import Body
 from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
     retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data, \
-    retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository
+    retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository, set_favourite
 from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, \
-    SimpleResponseModel, UpdateFindingModelFalsePositive, UpdateResponseModel
+    SimpleResponseModel, UpdateFindingModelFalsePositive, UpdateResponseModel, UpdateFindingModelFavourite
 
 router = APIRouter()
 
@@ -87,10 +87,23 @@ async def get_repository_findings(repository_id: str, token=Depends(auth.oauth2s
 # PUT
 #####################################
 
-@router.put('/{finding_id}', response_description='Update false-positive-assignment')
+@router.put('/{finding_id}/fp', response_description='Update false-positive-assignment')
 async def put_false_positive(finding_id: str, update_finding_model: UpdateFindingModelFalsePositive = Body(...), token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         update_result = await set_false_positive(finding_id=finding_id, update_false_positive=update_finding_model)
+
+        if update_result.modified_count == 1:
+            finding = await retrieve_single_finding(finding_id=finding_id)
+            return UpdateResponseModel(finding, 'Finding "{}" updated successfully'.format(finding_id))
+        return ErrorResponseModel('An error occurred.', 500, 'Could not update finding "{}"'.format(finding_id))
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
+
+
+@router.put('/{finding_id}/fav', response_description='Update favourite-status')
+async def put_favourite(finding_id: str, update_finding_model: UpdateFindingModelFavourite = Body(...), token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        update_result = await set_favourite(finding_id=finding_id, update_false_positive=update_finding_model)
 
         if update_result.modified_count == 1:
             finding = await retrieve_single_finding(finding_id=finding_id)

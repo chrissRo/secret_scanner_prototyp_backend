@@ -20,7 +20,7 @@ class FindingModel(BaseModel):
     scanStartTime: datetime = Field(...)
     scanEndTime: datetime = Field(...)
     save_date: datetime = Field(...)
-    isFavorite: StrictBool = False
+    isFavourite: StrictBool = False
     resultRaw: Union[GitleaksRawResultModel] = Field(...)
     falsePositive: FalsePositiveModel = Field(...)
 
@@ -52,6 +52,16 @@ class UpdateFindingModelFalsePositive(BaseModel):
         allow_population_by_field_name = True
         json_encoders = {PyObjectId: str}
         arbitrary_types_allowed = True
+
+
+class UpdateFindingModelFavourite(BaseModel):
+    isFavourite: StrictBool
+
+    class Config:
+        allow_population_by_field_name = True
+        json_encoders = {PyObjectId: str}
+        arbitrary_types_allowed = True
+
 
 def ResponseModel(data, message):
     return {

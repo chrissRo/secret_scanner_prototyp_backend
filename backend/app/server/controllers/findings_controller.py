@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from ..database import findings_collection
 # https://stackoverflow.com/questions/71467630/fastapi-issues-with-mongodb-typeerror-objectid-object-is-not-iterable
 from app.server.models.finding_models.finding_model import FindingModel, \
-    UpdateFindingModelFalsePositive
+    UpdateFindingModelFalsePositive, UpdateFindingModelFavourite
 
 
 #####################################
@@ -95,4 +95,7 @@ async def retrieve_overview_data_count_for_repository(repository_id: str) -> dic
 
 # update false-positive
 async def set_false_positive(finding_id: str, update_false_positive: UpdateFindingModelFalsePositive):
-        return await findings_collection.update_one({'_id': finding_id}, {'$set': jsonable_encoder(update_false_positive)})
+    return await findings_collection.update_one({'_id': finding_id}, {'$set': jsonable_encoder(update_false_positive)})
+
+async def set_favourite(finding_id: str, update_false_positive: UpdateFindingModelFavourite):
+    return await findings_collection.update_one({'_id': finding_id}, {'$set': jsonable_encoder(update_false_positive)})
