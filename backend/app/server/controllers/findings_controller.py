@@ -112,21 +112,16 @@ async def set_favourite(finding_id: str, update_false_positive: UpdateFindingMod
 #####################################
 
 # add new findings
-async def add_new_findings(new_findings: List[UploadNewFindingModel]):
+async def upload_new_findings(new_findings: List[UploadNewFindingModel]):
     try:
         helpers.clear_input_directory()
-
-        print(jsonable_encoder(new_findings))
-
         for new_finding in jsonable_encoder(new_findings):
             file_name = '{}__{}.json'.format(new_finding['scanDate'], new_finding['repositoryName'])
+            print(jsonable_encoder(new_finding))
             with open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='w') as f:
                 json.dump(new_finding['resultRaw'], f)
-            # schreibe raw-findings in den GitleaksConfig.FS_RAW_INPUT_PATH
-            # file-format:
-            #   eine JSON-Datei pro Repository-Scan, diese beinhaltet die Findings als Objekte
-            # Dateien so umbennen, dass sie meinem Format entsprechen
             # führe den Scan-Manager aus wie in der main.py
-        pass
+            # eigener API-Call um Zwischenergebnis zurückliefern zu können GET zB
     except OSError as e:
         print('Could not clear input directory -> {}'.format(e))
+

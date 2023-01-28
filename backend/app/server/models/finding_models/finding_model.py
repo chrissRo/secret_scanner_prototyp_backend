@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Union
+from typing import Union, List
 from pydantic import BaseModel, Field, DirectoryPath, validator, StrictBool
 
 from config.config import InitialModelValue
@@ -63,7 +63,7 @@ class UpdateFindingModelFavourite(BaseModel):
         arbitrary_types_allowed = True
 
 class UploadNewFindingModel(BaseModel):
-    resultRaw: Union[GitleaksRawResultModel] = Field(...)
+    resultRaw: List[Union[GitleaksRawResultModel]] = Field(...)
     scannerType: AvailableScanner
     scannerVersion: str = Field(...)
     inputType: InputType = InputType.API
