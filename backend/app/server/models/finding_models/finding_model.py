@@ -15,7 +15,7 @@ class FindingModel(BaseModel):
     scannerType: AvailableScanner
     scannerVersion: str = Field(...)
     inputType: InputType
-    repositoryPath: DirectoryPath = Field(...)
+    repositoryPath: str = Field(...)
     repositoryName: str = Field(...)
     scanStartTime: datetime = Field(...)
     scanEndTime: datetime = Field(...)
@@ -62,6 +62,19 @@ class UpdateFindingModelFavourite(BaseModel):
         json_encoders = {PyObjectId: str}
         arbitrary_types_allowed = True
 
+class UploadNewFindingModel(BaseModel):
+    resultRaw: Union[GitleaksRawResultModel] = Field(...)
+    scannerType: AvailableScanner
+    scannerVersion: str = Field(...)
+    inputType: InputType = InputType.API
+    repositoryPath: str = Field(...)
+    repositoryName: str = Field(...)
+    scanDate: datetime = Field(...)
+
+    class Config:
+        allow_population_by_field_name = True
+        json_encoders = {PyObjectId: str}
+        arbitrary_types_allowed = True
 
 def ResponseModel(data, message):
     return {

@@ -30,23 +30,25 @@ class FSScanResultsManager:
     _false_positives = []
     _db_client = None
     _findings_ids = []
+    _scanner = ''
+    _scanner_version = ''
 
-    def __init__(self, scanner: AvailableScanner, scanner_version: str):
+    def __init__(self):
+        self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
+        _db_client = database.db_client
+
+    async def run(self, scanner: AvailableScanner, scanner_version: str):
         if scanner.value == AvailableScanner.GITLEAKS.value:
-            self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
             self._scanner = scanner.GITLEAKS
             self._scanner_version = scanner_version
+
+            self.read_raw_input()
+            self.transform_raws_to_finding_model()
+            await self.remove_false_positives_from_transformed()
+            await self.write_results_to_db()
         else:
             # Todo Error Handling
             pass
-
-        _db_client = database.db_client
-
-    async def run(self):
-        self.read_raw_input()
-        self.transform_raws_to_finding_model()
-        await self.remove_false_positives_from_transformed()
-        await self.write_results_to_db()
 
     def read_raw_input(self):
         raw_json_files = []

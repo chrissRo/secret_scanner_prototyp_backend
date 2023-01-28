@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
@@ -7,9 +8,10 @@ from fastapi.params import Body
 from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
     retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data, \
-    retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository, set_favourite
+    retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository, set_favourite, add_new_findings
 from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, \
-    SimpleResponseModel, UpdateFindingModelFalsePositive, UpdateResponseModel, UpdateFindingModelFavourite
+    SimpleResponseModel, UpdateFindingModelFalsePositive, UpdateResponseModel, UpdateFindingModelFavourite, \
+    UploadNewFindingModel
 
 router = APIRouter()
 
@@ -109,6 +111,18 @@ async def put_favourite(finding_id: str, update_finding_model: UpdateFindingMode
             finding = await retrieve_single_finding(finding_id=finding_id)
             return UpdateResponseModel(finding, 'Finding "{}" updated successfully'.format(finding_id))
         return ErrorResponseModel('An error occurred.', 500, 'Could not update finding "{}"'.format(finding_id))
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
+
+
+#####################################
+# POST
+#####################################
+
+@router.post('/', response_description='Upload new findings')
+async def post_findings(upload_findings: List[UploadNewFindingModel] = Body(...), token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        await add_new_findings(new_findings=upload_findings)
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 

@@ -1,9 +1,15 @@
+import json
+import os.path
+from typing import List
 
 from fastapi.encoders import jsonable_encoder
+
+from config.config import GitleaksConfig
+from utils import helpers
 from ..database import findings_collection
 # https://stackoverflow.com/questions/71467630/fastapi-issues-with-mongodb-typeerror-objectid-object-is-not-iterable
 from app.server.models.finding_models.finding_model import FindingModel, \
-    UpdateFindingModelFalsePositive, UpdateFindingModelFavourite
+    UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModel
 
 
 #####################################
@@ -99,3 +105,28 @@ async def set_false_positive(finding_id: str, update_false_positive: UpdateFindi
 
 async def set_favourite(finding_id: str, update_false_positive: UpdateFindingModelFavourite):
     return await findings_collection.update_one({'_id': finding_id}, {'$set': jsonable_encoder(update_false_positive)})
+
+
+###########################
+# POST
+#####################################
+
+# add new findings
+async def add_new_findings(new_findings: List[UploadNewFindingModel]):
+    try:
+        helpers.clear_input_directory()
+
+        print(jsonable_encoder(new_findings))
+
+        for new_finding in jsonable_encoder(new_findings):
+            file_name = '{}__{}.json'.format(new_finding['scanDate'], new_finding['repositoryName'])
+            with open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='w') as f:
+                json.dump(new_finding['resultRaw'], f)
+            # schreibe raw-findings in den GitleaksConfig.FS_RAW_INPUT_PATH
+            # file-format:
+            #   eine JSON-Datei pro Repository-Scan, diese beinhaltet die Findings als Objekte
+            # Dateien so umbennen, dass sie meinem Format entsprechen
+            # führe den Scan-Manager aus wie in der main.py
+        pass
+    except OSError as e:
+        print('Could not clear input directory -> {}'.format(e))
