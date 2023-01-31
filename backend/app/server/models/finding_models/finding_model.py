@@ -1,5 +1,8 @@
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Union, List
+
+from fastapi import Form
 from pydantic import BaseModel, Field, DirectoryPath, validator, StrictBool
 
 from config.config import InitialModelValue
@@ -8,6 +11,7 @@ from app.server.models.finding_models.gitleaks_raw_result import GitleaksRawResu
 from app.server.models.finding_models.raw_result import RawResultModel
 from app.server.models.finding_models.false_positive import FalsePositiveModel, UpdateFalsePositive
 from app.globals.global_config import AvailableScanner, InputType
+from utils.helpers import form_body
 
 
 class FindingModel(BaseModel):
@@ -62,14 +66,28 @@ class UpdateFindingModelFavourite(BaseModel):
         json_encoders = {PyObjectId: str}
         arbitrary_types_allowed = True
 
-class UploadNewFindingModel(BaseModel):
-    resultRaw: List[Union[GitleaksRawResultModel]] = Field(...)
-    scannerType: AvailableScanner
+@form_body
+class UploadNewFindingModelForm(BaseModel):
+    scannerType: AvailableScanner = Form(...)
+    scannerVersion: str = Form(...)
+    inputType: InputType = InputType.API
+    repositoryPath: str = Form(...)
+    repositoryName: str = Form(...)
+    scanDate: datetime = Form(...)
+
+    class Config:
+        allow_population_by_field_name = True
+        json_encoders = {PyObjectId: str}
+        arbitrary_types_allowed = True
+
+class UploadNewFindingModelRaw(BaseModel):
+    scannerType: AvailableScanner = Field(...)
     scannerVersion: str = Field(...)
     inputType: InputType = InputType.API
     repositoryPath: str = Field(...)
     repositoryName: str = Field(...)
     scanDate: datetime = Field(...)
+    resultRaw: List[Union[GitleaksRawResultModel]] = Field(...)
 
     class Config:
         allow_population_by_field_name = True

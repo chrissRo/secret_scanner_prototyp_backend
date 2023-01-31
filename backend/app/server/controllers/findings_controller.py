@@ -2,6 +2,8 @@ import json
 import os.path
 from typing import List
 
+import aiofiles as aiofiles
+from fastapi import UploadFile
 from fastapi.encoders import jsonable_encoder
 
 from config.config import GitleaksConfig
@@ -9,7 +11,8 @@ from utils import helpers
 from ..database import findings_collection
 # https://stackoverflow.com/questions/71467630/fastapi-issues-with-mongodb-typeerror-objectid-object-is-not-iterable
 from app.server.models.finding_models.finding_model import FindingModel, \
-    UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModel
+    UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModelRaw, \
+    UploadNewFindingModelForm
 
 
 #####################################
@@ -112,7 +115,7 @@ async def set_favourite(finding_id: str, update_false_positive: UpdateFindingMod
 #####################################
 
 # add new findings
-async def upload_new_findings(new_findings: List[UploadNewFindingModel]):
+async def upload_new_findings(new_findings: List[UploadNewFindingModelRaw]):
     try:
         helpers.clear_input_directory()
         for new_finding in jsonable_encoder(new_findings):
@@ -125,3 +128,19 @@ async def upload_new_findings(new_findings: List[UploadNewFindingModel]):
     except OSError as e:
         print('Could not clear input directory -> {}'.format(e))
 
+async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm):
+    try:
+        helpers.clear_input_directory()
+
+        file_name = '{}__{}.json'.format(file_meta_data.scanDate, file_meta_data.repositoryName)
+        print(new_file.filename)
+        print(jsonable_encoder(file_meta_data))
+
+        async with aiofiles.open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='wb') as out_file:
+            file_content = await new_file.read()
+            await out_file.write(file_content)
+        # führe den Scan-Manager aus wie in der main.py
+        # eigener API-Call um Zwischenergebnis zurückliefern zu können GET zB
+        # fs_scan_manager könnte den Datei-Namen übergeben bekommen und dann nur diese eine Datei einscanne
+    except OSError as e:
+        print('Could not clear input directory -> {}'.format(e))

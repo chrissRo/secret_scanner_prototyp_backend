@@ -1,3 +1,5 @@
+from fastapi import Form
+
 from config.config import GitleaksConfig
 
 
@@ -11,3 +13,12 @@ def clear_input_directory():
         elif os.path.isdir(file_path):
             shutil.rmtree(file_path)
 
+
+def form_body(cls):
+    cls.__signature__ = cls.__signature__.replace(
+        parameters=[
+            arg.replace(default=Form(...))
+            for arg in cls.__signature__.parameters.values()
+        ]
+    )
+    return cls

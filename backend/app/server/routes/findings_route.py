@@ -1,17 +1,17 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Body
 
 from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
     retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data, \
-    retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository, set_favourite, upload_new_findings
+    retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository, set_favourite, \
+    upload_new_findings, upload_new_finding_file
 from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, \
     SimpleResponseModel, UpdateFindingModelFalsePositive, UpdateResponseModel, UpdateFindingModelFavourite, \
-    UploadNewFindingModel
-
+    UploadNewFindingModelRaw, UploadNewFindingModelForm
 router = APIRouter()
 
 
@@ -118,10 +118,16 @@ async def put_favourite(finding_id: str, update_finding_model: UpdateFindingMode
 # POST
 #####################################
 
-@router.post('/', response_description='Upload new findings')
-async def post_findings(upload_findings: List[UploadNewFindingModel] = Body(...), token=Depends(auth.oauth2scheme)):
+@router.post('/raw_upload', response_description='Upload new findings')
+async def post_findings_raw(upload_findings: List[UploadNewFindingModelRaw] = Body(...), token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         await upload_new_findings(new_findings=upload_findings)
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
+@router.post('/file_upload', response_description='Upload new findings')
+async def post_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm = Depends(), token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        await upload_new_finding_file(file_meta_data=file_meta_data, new_file=new_file)
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
