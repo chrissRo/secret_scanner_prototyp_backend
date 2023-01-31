@@ -1,11 +1,9 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Union, List
 
 from fastapi import Form
-from pydantic import BaseModel, Field, DirectoryPath, validator, StrictBool
+from pydantic import BaseModel, Field, validator, StrictBool
 
-from config.config import InitialModelValue
 from utils.PyObjectId import PyObjectId
 from app.server.models.finding_models.gitleaks_raw_result import GitleaksRawResultModel
 from app.server.models.finding_models.raw_result import RawResultModel
