@@ -94,10 +94,10 @@ class UploadNewFindingModelRaw(BaseModel):
         json_encoders = {PyObjectId: str}
         arbitrary_types_allowed = True
 
-def ResponseModel(data, message):
+def ResponseModel(data, message, code=200):
     return {
         "data": [data],
-        "code": 200,
+        "code": code,
         "message": message,
     }
 
@@ -108,10 +108,10 @@ def UpdateResponseModel(data, message):
         "message": message,
     }
 
-def SimpleResponseModel(data, message):
+def SimpleResponseModel(data, message, code=200):
     return {
         "data": data,
-        "code": 200,
+        "code": code,
         "message": message,
     }
 

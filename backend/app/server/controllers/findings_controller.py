@@ -133,14 +133,13 @@ async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNe
         helpers.clear_input_directory()
 
         file_name = '{}__{}.json'.format(file_meta_data.scanDate, file_meta_data.repositoryName)
-        print(new_file.filename)
-        print(jsonable_encoder(file_meta_data))
-
         async with aiofiles.open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='wb') as out_file:
             file_content = await new_file.read()
             await out_file.write(file_content)
+            return file_name
         # führe den Scan-Manager aus wie in der main.py
         # eigener API-Call um Zwischenergebnis zurückliefern zu können GET zB
         # fs_scan_manager könnte den Datei-Namen übergeben bekommen und dann nur diese eine Datei einscanne
     except OSError as e:
         print('Could not clear input directory -> {}'.format(e))
+

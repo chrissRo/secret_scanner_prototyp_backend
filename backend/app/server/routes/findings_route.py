@@ -128,6 +128,7 @@ async def post_findings_raw(upload_findings: List[UploadNewFindingModelRaw] = Bo
 @router.post('/file_upload', response_description='Upload new findings')
 async def post_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm = Depends(), token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
-        await upload_new_finding_file(file_meta_data=file_meta_data, new_file=new_file)
+        new_file = await upload_new_finding_file(file_meta_data=file_meta_data, new_file=new_file)
+        return SimpleResponseModel(data=new_file, code=201, message='File was created successfully')
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
