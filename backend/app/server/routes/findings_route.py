@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, UploadFile, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Body
 
@@ -125,10 +125,13 @@ async def post_findings_raw(upload_findings: List[UploadNewFindingModelRaw] = Bo
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 
-@router.post('/file_upload', response_description='Upload new findings')
+@router.post('/file_upload', response_description='Upload new list of findings')
 async def post_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm = Depends(), token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
-        new_file = await upload_new_finding_file(file_meta_data=file_meta_data, new_file=new_file)
-        return SimpleResponseModel(data=new_file, code=201, message='File was created successfully')
+        try:
+            new_file = await upload_new_finding_file(file_meta_data=file_meta_data, new_file=new_file)
+            return SimpleResponseModel(data=new_file, code=201, message='File was created successfully')
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail='Unprocessable Entity -> {}'.format(e))
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')

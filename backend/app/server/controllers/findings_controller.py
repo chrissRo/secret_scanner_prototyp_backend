@@ -6,13 +6,16 @@ import aiofiles as aiofiles
 from fastapi import UploadFile
 from fastapi.encoders import jsonable_encoder
 
+import app.server.controllers.scan_manager_controller
 from config.config import GitleaksConfig
 from utils import helpers
+from . import scan_manager_controller
 from ..database import findings_collection
 # https://stackoverflow.com/questions/71467630/fastapi-issues-with-mongodb-typeerror-objectid-object-is-not-iterable
 from app.server.models.finding_models.finding_model import FindingModel, \
     UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModelRaw, \
     UploadNewFindingModelForm
+from ..fs_scan_results.fs_scan_results_manager import FSScanResultsManager
 
 
 #####################################
@@ -131,15 +134,17 @@ async def upload_new_findings(new_findings: List[UploadNewFindingModelRaw]):
 async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm):
     try:
         helpers.clear_input_directory()
-
-        file_name = '{}__{}.json'.format(file_meta_data.scanDate, file_meta_data.repositoryName)
+        print(file_meta_data.scanDate)
+        file_name = '{}__{}__{}.json'.format(file_meta_data.scanDate, file_meta_data.repositoryName, file_meta_data.repositoryPath)
         async with aiofiles.open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='wb') as out_file:
             file_content = await new_file.read()
             await out_file.write(file_content)
+        with open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='r') as f:
+            data = json.load(f)
+        if isinstance(data, list):
             return file_name
-        # führe den Scan-Manager aus wie in der main.py
-        # eigener API-Call um Zwischenergebnis zurückliefern zu können GET zB
-        # fs_scan_manager könnte den Datei-Namen übergeben bekommen und dann nur diese eine Datei einscanne
+        else:
+            raise ValueError('Expected list-input')
     except OSError as e:
         print('Could not clear input directory -> {}'.format(e))
 
