@@ -11,5 +11,7 @@ async def start_file_import(file: str, file_meta_data: UploadNewFindingModelForm
         scanner_version=file_meta_data.scannerVersion,
         file=file)
 
-    print(results.inserted_ids)
-    return results.inserted_ids
+    if results:
+        return results
+    else:
+        return None

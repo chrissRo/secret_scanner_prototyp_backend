@@ -25,6 +25,7 @@ anschließend können die neuen Ergebnisse für eine Evaluierung bereitgestellt 
 class FSScanResultsManager:
     _raw_results = []
     _transformed_results = []
+    _already_stored_in_db = []
     _validation_errors = []
     _value_errors = []
     _false_positives = []
@@ -37,7 +38,7 @@ class FSScanResultsManager:
         self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
         _db_client = database.db_client
 
-    async def run(self, scanner: AvailableScanner, scanner_version: str, file=None) -> []:
+    async def run(self, scanner: AvailableScanner, scanner_version: str, file=None) -> [{}]:
         if scanner.value == AvailableScanner.GITLEAKS.value:
             self._scanner = scanner.GITLEAKS
             self._scanner_version = scanner_version
@@ -47,8 +48,18 @@ class FSScanResultsManager:
             else:
                 self.read_raw_input()
             self.transform_raws_to_finding_model()
-            await self.remove_false_positives_from_transformed()
-            return await self.write_results_to_db()
+            await self.remove_already_stored_from_transformed()
+            db_results = await self.write_results_to_db()
+            if db_results:
+                db_results = db_results.inserted_ids
+            else:
+                db_results = []
+
+            print(self._already_stored_in_db)
+            return {
+                'db_results': db_results,
+                'already_stored': self._already_stored_in_db
+            }
         else:
             # Todo Error Handling
             pass
@@ -94,26 +105,37 @@ class FSScanResultsManager:
                 print("Invalid JSON for: {}".format(repo_name))
                 self._value_errors.append(f.name)
 
-    async def remove_false_positives_from_transformed(self):
+    async def remove_already_stored_from_transformed(self):
 
-        true_positives = []
+        not_yet_stored = []
 
         await self.get_all_false_positive()
 
         for entry in self._transformed_results:
-            if not self.is_false_positive(entry):
-                true_positives.append(entry)
+            if not await self.is_already_stored(entry):
+                not_yet_stored.append(entry)
             else:
-                print("False-Positive found: {}".format(entry.resultRaw.Fingerprint))
-        self._transformed_results = true_positives
+                print("Already stored: {}".format(entry.resultRaw.Fingerprint))
+                self._already_stored_in_db.append(str(entry.id))
+        self._transformed_results = not_yet_stored
 
     def is_false_positive(self, entry: FindingModel) -> bool:
         # check if entry is already stored as false_positive in database
         # get all entries in db that are marked as false-positive
 
         for false_positive in self._false_positives:
+            print(false_positive)
             if false_positive['resultRaw']['Fingerprint'] == entry.resultRaw.Fingerprint:
                 return True
+        return False
+
+    async def is_already_stored(self, entry: FindingModel) -> bool:
+        # check if entry is already stored in database
+        # if yes do not store it
+        # use fingerprint
+        db_entry = await findings_collection.find_one({'resultRaw.Fingerprint': entry.resultRaw.Fingerprint})
+        if db_entry:
+            return True
         return False
 
     async def get_all_false_positive(self):
