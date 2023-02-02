@@ -131,7 +131,6 @@ async def upload_new_findings(new_findings: List[UploadNewFindingModelRaw]):
 async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm):
     try:
         helpers.clear_input_directory()
-        print(file_meta_data.scanDate)
         file_name = '{}__{}__{}.json'.format(file_meta_data.scanDate, file_meta_data.repositoryName, file_meta_data.repositoryPath)
         async with aiofiles.open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='wb') as out_file:
             file_content = await new_file.read()

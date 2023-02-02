@@ -15,4 +15,4 @@ async def get_scanner_types(token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         return {s.name: s.value for s in AvailableScanner}
     else:
-        ErrorResponseModel('An error occurred.', 500, 'Could not calculate data count')
+        ErrorResponseModel('An error occurred.', 500, 'Could not fetch supported scanner-types')
