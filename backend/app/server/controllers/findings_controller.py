@@ -46,15 +46,12 @@ async def retrieve_all_findings_for_repository(repository_id: str) -> list:
 
     async for finding in findings_collection.find({'repositoryName': repository_id}):
         findings.append(finding)
-    return findings
+    return sorted(findings, key=lambda d: (d['resultRaw']['Commit'].casefold(), d['resultRaw']['File']))
 
 async def retrieve_overview_data() -> list:
     overview = []
     async for repo in findings_collection.aggregate([{"$group": {"_id": "$repositoryName"}}]):
-        # now we have the distinct repo-names
-        # and we can select data to each repository by name
-        #repo_data = await findings_collection.find({"repositoryName": repo['_id']}, {'repositoryPath': 1, 'scanEndTime': 1, 'scannerType': 1, 'scannerVersion': 1}).to_list(length=None)
-        # get only latest scan
+         # get only latest scan
 
         overview.append((await findings_collection.find({
             "repositoryName": repo['_id']},
@@ -65,7 +62,7 @@ async def retrieve_overview_data() -> list:
              'scannerVersion': 1
              }).sort('scanEndTime', -1).limit(1).to_list(length=None))[0])
 
-    return overview
+    return sorted(overview, key=lambda d: d['repositoryName'].casefold())
 
 async def retrieve_overview_data_count() -> dict:
     data_count = {
