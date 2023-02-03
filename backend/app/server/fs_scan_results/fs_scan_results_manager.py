@@ -25,7 +25,7 @@ anschließend können die neuen Ergebnisse für eine Evaluierung bereitgestellt 
 class FSScanResultsManager:
     _raw_results = []
     _transformed_results = []
-    _already_stored_in_db = []
+    _already_stored_in_db = set()
     _validation_errors = []
     _value_errors = []
     _false_positives = []
@@ -116,7 +116,7 @@ class FSScanResultsManager:
                 not_yet_stored.append(entry)
             else:
                 print("Already stored: {}".format(entry.resultRaw.Fingerprint))
-                self._already_stored_in_db.append(str(entry.id))
+                self._already_stored_in_db.add(str(entry.id))
         self._transformed_results = not_yet_stored
 
     def is_false_positive(self, entry: FindingModel) -> bool:
