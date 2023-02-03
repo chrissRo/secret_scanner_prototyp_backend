@@ -68,7 +68,9 @@ async def retrieve_overview_data_count() -> dict:
     data_count = {
         'total_number_of_documents': 0,
         'total_number_of_distinct_repos': 0,
-        'documents_per_repository': []
+        'documents_per_repository': [],
+        'total_false_positives': await findings_collection.count_documents({'falsePositive.isFalsePositive': True}),
+        'total_true_positives': await findings_collection.count_documents({'falsePositive.isFalsePositive': False})
     }
 
     async for total_number_of_docs in findings_collection.aggregate([{"$count": "total_number_of_documents"}]):
