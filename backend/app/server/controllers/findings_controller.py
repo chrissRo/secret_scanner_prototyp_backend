@@ -99,11 +99,14 @@ async def retrieve_overview_data_count_for_repository(repository_id: str) -> dic
         'total_number_of_true_positives': await findings_collection.count_documents({
             '$and': [{'repositoryName': repository_id}, {'falsePositive.isFalsePositive': False}]
         }),
-        'total_number_of_todos': await findings_collection.count_documents({
-            '$and': [{'repositoryName': repository_id},
-                     {'falsePositive.change_date': InitialModelValue.CHANGE_DATE},
-                     {'falsePositive.justification': ''}]
-        }),
+        'total_initial_values': await findings_collection.count_documents({
+            '$and': [
+                {'repositoryName': repository_id},
+                {'falsePositive.isFalsePositive': False},
+                {'falsePositive.justification': InitialModelValue.JUSTIFICATION},
+                {'falsePositive.change_date': InitialModelValue.CHANGE_DATE}
+            ]
+        })
     }
     return data_count
 
