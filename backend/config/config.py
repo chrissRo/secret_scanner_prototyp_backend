@@ -8,6 +8,7 @@ class GitleaksConfig:
 
 class InitialModelValue:
     JUSTIFICATION = 'init'
+    CHANGE_DATE = '1900-01-01 00:00:00.000000'
 
 
 class JWTConfig:

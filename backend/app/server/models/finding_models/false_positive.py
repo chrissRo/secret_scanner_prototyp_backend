@@ -8,7 +8,7 @@ class FalsePositiveModel(BaseModel):
 
     isFalsePositive: StrictBool = False
     justification: str = Field(...)
-    change_date: datetime = '1900-01-01 00:00:00.000000'
+    change_date: datetime = InitialModelValue.CHANGE_DATE
     
     @validator('justification')
     def false_positive_needs_justification(cls, value):

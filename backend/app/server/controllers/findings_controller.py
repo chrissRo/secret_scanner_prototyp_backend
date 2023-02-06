@@ -7,7 +7,7 @@ from fastapi import UploadFile
 from fastapi.encoders import jsonable_encoder
 
 import app.server.controllers.scan_manager_controller
-from config.config import GitleaksConfig
+from config.config import GitleaksConfig, InitialModelValue
 from utils import helpers
 from . import scan_manager_controller
 from ..database import findings_collection
@@ -70,7 +70,14 @@ async def retrieve_overview_data_count() -> dict:
         'total_number_of_distinct_repos': 0,
         'documents_per_repository': [],
         'total_false_positives': await findings_collection.count_documents({'falsePositive.isFalsePositive': True}),
-        'total_true_positives': await findings_collection.count_documents({'falsePositive.isFalsePositive': False})
+        'total_true_positives': await findings_collection.count_documents({'falsePositive.isFalsePositive': False}),
+        'total_initial_values': await findings_collection.count_documents({
+            '$and': [
+                {'falsePositive.isFalsePositive': False},
+                {'falsePositive.justification': InitialModelValue.JUSTIFICATION},
+                {'falsePositive.change_date': InitialModelValue.CHANGE_DATE}
+            ]
+        })
     }
 
     async for total_number_of_docs in findings_collection.aggregate([{"$count": "total_number_of_documents"}]):
@@ -94,9 +101,9 @@ async def retrieve_overview_data_count_for_repository(repository_id: str) -> dic
         }),
         'total_number_of_todos': await findings_collection.count_documents({
             '$and': [{'repositoryName': repository_id},
-                     {'falsePositive.change_date': '1900-01-01 00:00:00.000000'},
+                     {'falsePositive.change_date': InitialModelValue.CHANGE_DATE},
                      {'falsePositive.justification': ''}]
-        })
+        }),
     }
     return data_count
 
