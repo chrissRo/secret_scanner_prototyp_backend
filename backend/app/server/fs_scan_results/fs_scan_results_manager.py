@@ -13,7 +13,7 @@ from app.server.database import findings_collection
 from app.server.models.finding_models.false_positive import FalsePositiveModel
 from app.server.models.finding_models.finding_model import FindingModel
 from app.server.models.finding_models.gitleaks_raw_result import GitleaksRawResultModel
-from config.config import GitleaksConfig
+from config.config import GitleaksConfig, InitialModelValue
 import os
 
 """
@@ -25,28 +25,58 @@ anschließend können die neuen Ergebnisse für eine Evaluierung bereitgestellt 
 class FSScanResultsManager:
     _raw_results = []
     _transformed_results = []
+    _already_stored_in_db = set()
     _validation_errors = []
     _value_errors = []
     _false_positives = []
     _db_client = None
     _findings_ids = []
+    _scanner = ''
+    _scanner_version = ''
 
-    def __init__(self, scanner: AvailableScanner, scanner_version: str):
+    def __init__(self):
+        self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
+        _db_client = database.db_client
+
+    async def run(self, scanner: AvailableScanner, scanner_version: str, file=None) -> [{}]:
         if scanner.value == AvailableScanner.GITLEAKS.value:
-            self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
             self._scanner = scanner.GITLEAKS
             self._scanner_version = scanner_version
+
+            if file:
+                self.read_raw_input_file(file=file)
+            else:
+                self.read_raw_input()
+            self.transform_raws_to_finding_model()
+            await self.remove_already_stored_from_transformed()
+            db_results = await self.write_results_to_db()
+            if db_results:
+                db_results = db_results.inserted_ids
+            else:
+                db_results = []
+
+            print(self._already_stored_in_db)
+            return {
+                'db_results': db_results,
+                'already_stored': self._already_stored_in_db
+            }
         else:
             # Todo Error Handling
             pass
 
-        _db_client = database.db_client
-
-    async def run(self):
-        self.read_raw_input()
-        self.transform_raws_to_finding_model()
-        await self.remove_false_positives_from_transformed()
-        await self.write_results_to_db()
+    def read_raw_input_file(self, file):
+        try:
+            # check if json
+            if not file.endswith(GitleaksConfig.FS_RAW_INPUT_FILE_TYPE):
+                raise FileExistsError
+            self.read_file(file=file)
+        except FileNotFoundError as e:
+            # Todo Error Handling
+            print(e)
+        except FileExistsError as e:
+            # Todo Error Handling
+            print(e)
+            print('No JSON-File found')
 
     def read_raw_input(self):
         raw_json_files = []
@@ -58,41 +88,54 @@ class FSScanResultsManager:
         except FileNotFoundError as e:
             # Todo Error Handling
             print(e)
-            sys.exit()
 
         for file in raw_json_files:
-            with open(file=os.path.join(self._raw_input_path, file), mode='r') as f:
-                try:
-                    data = json.load(f)
-                    if data:
-                        scan_date, repo_name = file.split('__')
-                        repo_name = pathlib.Path(repo_name).stem
-                        self._raw_results.append({"scan_date": scan_date, "repo_name": repo_name, "data": data})
-                except ValueError:
-                    # Todo Error Handling
-                    print("Invalid JSON for: {}".format(repo_name))
-                    self._value_errors.append(f.name)
+            self.read_file(file=file)
 
-    async def remove_false_positives_from_transformed(self):
+    def read_file(self, file):
+        with open(file=os.path.join(self._raw_input_path, file), mode='r') as f:
+            try:
+                data = json.load(f)
+                if data:
+                    scan_date, repo_name, repo_path = file.split('__')
+                    repo_name = pathlib.Path(repo_name).stem
+                    self._raw_results.append({"scan_date": scan_date, "repo_name": repo_name, "data": data, "repo_path": repo_path})
+            except ValueError:
+                # Todo Error Handling
+                print("Invalid JSON for: {}".format(repo_name))
+                self._value_errors.append(f.name)
 
-        true_positives = []
+    async def remove_already_stored_from_transformed(self):
+
+        not_yet_stored = []
 
         await self.get_all_false_positive()
 
         for entry in self._transformed_results:
-            if not self.is_false_positive(entry):
-                true_positives.append(entry)
+            if not await self.is_already_stored(entry):
+                not_yet_stored.append(entry)
             else:
-                print("False-Positive found: {}".format(entry.resultRaw.Fingerprint))
-        self._transformed_results = true_positives
+                print("Already stored: {}".format(entry.resultRaw.Fingerprint))
+                self._already_stored_in_db.add(str(entry.id))
+        self._transformed_results = not_yet_stored
 
     def is_false_positive(self, entry: FindingModel) -> bool:
         # check if entry is already stored as false_positive in database
         # get all entries in db that are marked as false-positive
 
         for false_positive in self._false_positives:
+            print(false_positive)
             if false_positive['resultRaw']['Fingerprint'] == entry.resultRaw.Fingerprint:
                 return True
+        return False
+
+    async def is_already_stored(self, entry: FindingModel) -> bool:
+        # check if entry is already stored in database
+        # if yes do not store it
+        # use fingerprint
+        db_entry = await findings_collection.find_one({'resultRaw.Fingerprint': entry.resultRaw.Fingerprint})
+        if db_entry:
+            return True
         return False
 
     async def get_all_false_positive(self):
@@ -111,23 +154,25 @@ class FSScanResultsManager:
                 try:
                     self._transformed_results.append(FindingModel(scannerType=self._scanner.value,
                                                                   inputType=InputType.FileSystem,
-                                                                  repositoryPath=pathlib.Path(),
+                                                                  repositoryPath=scan['repo_path'],
                                                                   repositoryName=scan["repo_name"],
-                                                                  scanStartTime=datetime.fromisoformat('{}T00:00'
-                                                                                                       ':00'.format(
-                                                                      scan["scan_date"])),
-                                                                  scanEndTime=datetime.fromisoformat('{}T00:00'
-                                                                                                     ':00'.format(
-                                                                      scan["scan_date"])),
+                                                                  scanStartTime=datetime.fromisoformat(scan["scan_date"]),
+                                                                  scanEndTime=datetime.fromisoformat(scan["scan_date"]),
                                                                   resultRaw=GitleaksRawResultModel(
                                                                       **raw_result),
-                                                                  falsePositive=FalsePositiveModel(justification="init"),
+                                                                  falsePositive=FalsePositiveModel(
+                                                                      justification=InitialModelValue.JUSTIFICATION),
                                                                   scannerVersion=self._scanner_version,
                                                                   save_date=datetime.today()))
                 except ValidationError as e:
                     # Todo Error Handling
                     print("Validation Error for: {}".format(scan["repo_name"]))
                     self._validation_errors.append(raw_result)
+                    print(e)
+                except ValueError as e:
+                    # Todo Error Handling
+                    #print("Value Error for: {}".format(scan))
+                    self._value_errors.append(raw_result)
                     print(e)
 
     async def get_findings_from_db(self) -> []:
@@ -138,4 +183,4 @@ class FSScanResultsManager:
 
     async def write_results_to_db(self) -> []:
         if self._transformed_results:
-            await findings_collection.insert_many(jsonable_encoder(self._transformed_results))
+            return await findings_collection.insert_many(jsonable_encoder(self._transformed_results))

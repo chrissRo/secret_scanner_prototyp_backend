@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class AvailableScanner(Enum):
+class AvailableScanner(IntEnum):
     GITLEAKS = 0
     TRUFFLEHOG = 1
 
 
-class InputType(Enum):
+class InputType(IntEnum):
     FileSystem = 0
     API = 1
