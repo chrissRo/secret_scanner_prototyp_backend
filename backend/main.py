@@ -10,9 +10,7 @@ if __name__ == "__main__":
         "app.server.app:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,
-        ssl_keyfile='../certificate/backend.key',
-        ssl_certfile='../certificate/backend.pem'
+        reload=True
         )
 
     #fs_scan_results_manager = FSScanResultsManager(scanner=AvailableScanner.GITLEAKS, scanner_version='8.15')
