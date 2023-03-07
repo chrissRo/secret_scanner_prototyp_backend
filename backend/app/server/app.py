@@ -10,8 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "https://localhost:3000",
-    "https://vue_frontend:3000"
+    "http://localhost:3000",
+    "http://vue_frontend:3000"
 ]
 
 app.add_middleware(
