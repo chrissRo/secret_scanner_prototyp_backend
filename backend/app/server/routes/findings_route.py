@@ -8,7 +8,7 @@ from app.server.auth.auth import auth
 from app.server.controllers.findings_controller import retrieve_all_findings, set_false_positive, \
     retrieve_single_finding, retrieve_overview_data_count, retrieve_overview_data, \
     retrieve_all_findings_for_repository, retrieve_overview_data_count_for_repository, set_favourite, \
-    upload_new_findings, upload_new_finding_file, retrieve_all_favourite_findings
+    upload_new_findings, upload_new_finding_file, retrieve_all_favourite_findings, retrieve_all_true_positives
 from app.server.models.finding_models.finding_model import ResponseModel, ErrorResponseModel, \
     SimpleResponseModel, UpdateFindingModelFalsePositive, UpdateResponseModel, UpdateFindingModelFavourite, \
     UploadNewFindingModelRaw, UploadNewFindingModelForm
@@ -51,14 +51,23 @@ async def get_finding_overview(token=Depends(auth.oauth2scheme)):
 
 @router.get('/favourites', response_description='Get all favourite findings')
 async def get_all_favourite_findings(token=Depends(auth.oauth2scheme)):
-    print("here")
     if await auth.is_authenticated(token=token):
         findings = await retrieve_all_favourite_findings()
-        print("here")
         if findings:
             return SimpleResponseModel(findings, 'All favourite findings retrieved successfully')
         else:
             return ErrorResponseModel('An error occurred.', 500, 'Could not retrieve favourite findings.')
+    else:
+        return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
+
+@router.get('/true_positives', response_description='Get all true-positive findings')
+async def get_all_favourite_findings(token=Depends(auth.oauth2scheme)):
+    if await auth.is_authenticated(token=token):
+        findings = await retrieve_all_true_positives()
+        if findings:
+            return SimpleResponseModel(findings, 'All true-positive findings retrieved successfully')
+        else:
+            return ErrorResponseModel('An error occurred.', 500, 'Could not retrieve true-positive findings.')
     else:
         return ErrorResponseModel(error='Invalid User', code=403, message='Please login')
 

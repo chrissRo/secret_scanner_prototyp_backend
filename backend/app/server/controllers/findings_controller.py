@@ -62,11 +62,18 @@ async def retrieve_all_favourite_findings() -> list:
         findings.append(repo)
     return findings
 
+async def retrieve_all_true_positives() -> list:
+    findings = []
+
+    async for repo in findings_collection.aggregate([
+        {'$match': {'falsePositive.isFalsePositive': False}},
+        {'$sort': {'repositoryName': 1}}
+    ]):
+        findings.append(repo)
+    return findings
 async def retrieve_overview_data() -> list:
     overview = []
     async for repo in findings_collection.aggregate([{"$group": {"_id": "$repositoryName"}}]):
-        # get only latest scan
-
         overview.append((await findings_collection.find({
             "repositoryName": repo['_id']},
             {'repositoryName': 1,
@@ -88,7 +95,7 @@ async def retrieve_overview_data_count() -> dict:
         'total_true_positives': await findings_collection.count_documents({'falsePositive.isFalsePositive': False}),
         'total_initial_values': await findings_collection.count_documents({
             '$and': [
-                {'falsePositive.isFalsePositive': False},
+                {'falsePositive.isFalsePositive': True},
                 {'falsePositive.justification': InitialModelValue.JUSTIFICATION},
                 {'falsePositive.change_date': InitialModelValue.CHANGE_DATE}
             ]
@@ -119,7 +126,7 @@ async def retrieve_overview_data_count_for_repository(repository_id: str) -> dic
         'total_initial_values': await findings_collection.count_documents({
             '$and': [
                 {'repositoryName': repository_id},
-                {'falsePositive.isFalsePositive': False},
+                {'falsePositive.isFalsePositive': True},
                 {'falsePositive.justification': InitialModelValue.JUSTIFICATION},
                 {'falsePositive.change_date': InitialModelValue.CHANGE_DATE}
             ]
