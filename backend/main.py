@@ -2,10 +2,12 @@ import asyncio
 
 import uvicorn
 
-from app.globals.global_config import AvailableScanner
-from app.server.fs_scan_results.fs_scan_results_manager import FSScanResultsManager
+from app.user.user_manager import UserManager
 
 if __name__ == "__main__":
+
+    asyncio.run(UserManager().run())
+
     uvicorn.run(
         "app.server.app:app",
         host="0.0.0.0",

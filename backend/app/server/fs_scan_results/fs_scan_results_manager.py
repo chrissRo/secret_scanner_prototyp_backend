@@ -171,7 +171,6 @@ class FSScanResultsManager:
                     print(e)
                 except ValueError as e:
                     # Todo Error Handling
-                    #print("Value Error for: {}".format(scan))
                     self._value_errors.append(raw_result)
                     print(e)
 

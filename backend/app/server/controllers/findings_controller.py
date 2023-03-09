@@ -1,21 +1,16 @@
 import json
 import os.path
 from typing import List
-
 import aiofiles as aiofiles
 from fastapi import UploadFile
 from fastapi.encoders import jsonable_encoder
-
-import app.server.controllers.scan_manager_controller
 from config.config import GitleaksConfig, InitialModelValue
 from utils import helpers
-from . import scan_manager_controller
 from ..database import findings_collection
 # https://stackoverflow.com/questions/71467630/fastapi-issues-with-mongodb-typeerror-objectid-object-is-not-iterable
 from app.server.models.finding_models.finding_model import FindingModel, \
     UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModelRaw, \
     UploadNewFindingModelForm
-from ..fs_scan_results.fs_scan_results_manager import FSScanResultsManager
 
 
 #####################################
