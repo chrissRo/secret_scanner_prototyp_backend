@@ -1,0 +1,19 @@
+version: 1
+disable_existing_loggers: no
+formatters:
+    simple:
+        format: '%(levelname)-8s | %(asctime)s | %(lineno)-4s - %(funcName)-30s | %(message)s'
+handlers:
+  uvicorn:
+      class: logging.handlers.TimedRotatingFileHandler
+      level: DEBUG
+      formatter: simple
+      when: D
+      backupCount: 0
+      filename: app/log/uvicorn.log
+loggers:
+  uvicorn:
+      level: INFO
+      handlers: [uvicorn]
+      propagate: yes
+      qualname: uvicorn
