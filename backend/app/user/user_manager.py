@@ -1,3 +1,4 @@
+import logging
 import os
 
 from dotenv import load_dotenv
@@ -29,15 +30,20 @@ class UserManager:
         new_user = await self.create_user()
 
         if new_user:
-            print_user(user=new_user)
+            logging.debug('New User created from env-file')
+            logging.debug(UserPublicModel(username=new_user['username'], email=new_user['email'], active=new_user['active']))
+        else:
+            logging.debug('No new User created, use one of the already existing')
 
     async def user_already_created(self) -> bool:
         user = await user_collection.find_one({'username': self._username})
 
         if user:
+            logging.debug('User already stored in database')
             print_user(user=user)
             return True
         else:
+            logging.debug('User not yet stored in database')
             return False
 
     async def create_user(self) -> UserModel:
@@ -50,5 +56,6 @@ class UserManager:
                 email=EmailStr(self._user_email)
             )))
             if new_user.inserted_id:
+                logging.debug('New User created {}'.format(new_user.inserted_id))
                 return await user_collection.find_one({'_id': new_user.inserted_id})
 
