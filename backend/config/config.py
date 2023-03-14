@@ -21,4 +21,4 @@ class LoggerConfig:
     LOG_LEVEL = logging.DEBUG
     LOG_FILE = 'app/log/application.log'
     FILE_MODE = 'a'
-    LOG_FORMAT = '%(levelname)-8s | %(asctime)s | %(lineno)-4s - %(funcName)-30s | %(message)s'
+    LOG_FORMAT = '%(levelname)-8s | %(asctime)s | %(lineno)-4s - %(funcName)-40s | %(message)s'

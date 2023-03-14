@@ -43,7 +43,7 @@ class Auth:
     async def authenticate_user(self, username: str, password: str) -> UserPublicModel:
         user = await user_controller.retrieve_single_user_private(username=username)
         if user:
-            logger.debug("Found user {} in DB".format(user))
+            logger.debug("Found user {} in DB".format(UserPublicModel(username=user['username'], email=user['email'], active=user['active'])))
             if self.verify_password(plain_password=password, hashed_password=user['password']):
                 return UserPublicModel(username=user['username'], email=user['email'], active=user['active'])
             else:
@@ -79,7 +79,7 @@ class Auth:
         try:
             current_user = await self.get_current_user(token=token)
             if current_user and current_user['active']:
-                logger.debug("User {} authenticated".format(current_user))
+                logger.debug("User {} authenticated".format(UserPublicModel(username=current_user['username'], email=current_user['email'], active=current_user['active'])))
                 return True
             logger.debug("User not authenticated")
             return False
