@@ -78,6 +78,19 @@ class UploadNewFindingModelForm(BaseModel):
         json_encoders = {PyObjectId: str}
         arbitrary_types_allowed = True
 
+class UploadNewFindingModel(BaseModel):
+    scannerType: AvailableScanner
+    scannerVersion: str
+    inputType: InputType
+    repositoryPath: str
+    repositoryName: str
+    scanDate: datetime
+
+    class Config:
+        allow_population_by_field_name = True
+        json_encoders = {PyObjectId: str}
+        arbitrary_types_allowed = True
+
 class UploadNewFindingModelRaw(BaseModel):
     scannerType: AvailableScanner = Field(...)
     scannerVersion: str = Field(...)
