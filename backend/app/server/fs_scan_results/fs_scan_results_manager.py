@@ -44,9 +44,11 @@ class FSScanResultsManager:
             self._scanner_version = scanner_version
 
             if file:
-                logger.debug("AvailableScanner is Gitleaks. Using FileInput")
+                logger.debug("AvailableScanner is Gitleaks. Using FileInput with file {}".format(file))
                 self.read_raw_input_file(file=file)
             else:
+                logger.debug("AvailableScanner is Gitleaks. Using FileInput with default filepath {}".format(
+                    GitleaksConfig.FS_RAW_INPUT_PATH))
                 self.read_raw_input()
             self.transform_raws_to_finding_model()
             await self.remove_already_stored_from_transformed()
