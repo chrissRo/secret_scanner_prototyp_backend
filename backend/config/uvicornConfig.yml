@@ -2,7 +2,7 @@ version: 1
 disable_existing_loggers: no
 formatters:
     simple:
-        format: '%(levelname)-8s | %(asctime)s | %(lineno)-4s - %(funcName)-30s | %(message)s'
+        format: '%(levelname)-8s | %(asctime)s | %(lineno)-4s - %(funcName)-40s | %(message)s'
 handlers:
   uvicorn:
       class: logging.handlers.TimedRotatingFileHandler
