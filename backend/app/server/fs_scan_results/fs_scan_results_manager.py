@@ -9,7 +9,8 @@ from app.globals.global_config import AvailableScanner, InputType
 from app.server import database
 from app.server.database import findings_collection
 from app.server.models.finding_models.false_positive import FalsePositiveModel
-from app.server.models.finding_models.finding_model import FindingModel
+from app.server.models.finding_models.finding_model import FindingModel,\
+    UploadNewFindingModel
 from app.server.models.finding_models.gitleaks_raw_result import GitleaksRawResultModel
 from config.config import GitleaksConfig, InitialModelValue
 
@@ -26,22 +27,39 @@ class FSScanResultsManager:
     _transformed_results = []
     _already_stored_in_db = set()
     _validation_errors = []
+    _type_errors = []
     _value_errors = []
     _false_positives = []
     _db_client = None
     _findings_ids = []
     _scanner = ''
     _scanner_version = ''
+    _file_meta_data = {}
 
     def __init__(self):
         self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
         _db_client = database.db_client
 
-    async def run(self, scanner: AvailableScanner, scanner_version: str, file=None) -> [{}]:
-        if scanner.value == AvailableScanner.GITLEAKS.value:
+    def cleanup(self):
+        logger.debug("Cleaning up FSScanResultsManager")
+        self._raw_results.clear()
+        self._transformed_results.clear()
+        self._already_stored_in_db.clear()
+        self._validation_errors.clear()
+        self._type_errors.clear()
+        self._value_errors.clear()
+        self._false_positives.clear()
+        self._db_client = None
+        self._findings_ids.clear()
+        self._scanner = ''
+        self._scanner_version = ''
+
+    async def run(self, meta_data: UploadNewFindingModel, file=None) -> [{}]:
+        self._file_meta_data = meta_data
+        if self._file_meta_data.scannerType.value == AvailableScanner.GITLEAKS.value:
             logger.debug("AvailableScanner is Gitleaks")
-            self._scanner = scanner.GITLEAKS
-            self._scanner_version = scanner_version
+            self._scanner = AvailableScanner.GITLEAKS
+            self._scanner_version = self._file_meta_data.scannerVersion
 
             if file:
                 logger.debug("AvailableScanner is Gitleaks. Using FileInput with file {}".format(file))
@@ -63,14 +81,17 @@ class FSScanResultsManager:
             logger.debug("Result:")
             run_result = {
                 'db_results': db_results,
-                'already_stored': self._already_stored_in_db
+                'already_stored': self._already_stored_in_db,
+                'errors': len(self._type_errors) + len(self._value_errors) + len(self._validation_errors)
             }
             logger.debug(run_result)
+            self.cleanup()
             return run_result
         else:
             # Todo Error Handling
-            logger.debug("No AvailableScanner provided. Value was {} -> Skipping step ...".format(scanner.value))
-            pass
+            logger.debug("Invalid AvailableScanner provided. Value was {} -> Skipping step ...".format(self._file_meta_data.scannerType.value))
+            self.cleanup()
+            raise ValueError("Invalid AvailableScanner provided")
 
     def read_raw_input_file(self, file):
         try:
@@ -110,10 +131,13 @@ class FSScanResultsManager:
             try:
                 data = json.load(f)
                 if data:
-                    scan_date, repo_name, repo_path = file.split('__')
-                    repo_name = pathlib.Path(repo_name).stem
-                    logger.debug("Found valid JSON in file {}. Repository is {}".format(f, repo_name))
-                    self._raw_results.append({"scan_date": scan_date, "repo_name": repo_name, "data": data, "repo_path": repo_path})
+                    logger.debug("Found valid JSON in file {}. Repository is {}".format(f, self._file_meta_data.repositoryName))
+                    self._raw_results.append({
+                        "scan_date": str(self._file_meta_data.scanDate),
+                        "repo_name": self._file_meta_data.repositoryName,
+                        "repo_path": self._file_meta_data.repositoryPath,
+                        "data": data
+                    })
             except ValueError:
                 # Todo Error Handling
                 logger.debug("Invalid JSON for: {}".format(f))
@@ -180,6 +204,11 @@ class FSScanResultsManager:
                                                                       justification=InitialModelValue.JUSTIFICATION),
                                                                   scannerVersion=self._scanner_version,
                                                                   save_date=datetime.today()))
+                except TypeError as e:
+                    # Todo Error Handling
+                    logger.debug("Type Error for: {}".format(scan["repo_name"]))
+                    self._type_errors.append(raw_result)
+                    logger.debug(e)
                 except ValidationError as e:
                     # Todo Error Handling
                     logger.debug("Validation Error for: {}".format(scan["repo_name"]))
@@ -201,3 +230,4 @@ class FSScanResultsManager:
         if self._transformed_results:
             logger.debug("Will write {} entries to DB".format(len(self._transformed_results)))
             return await findings_collection.insert_many(jsonable_encoder(self._transformed_results))
+

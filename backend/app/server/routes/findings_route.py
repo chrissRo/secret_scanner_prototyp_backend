@@ -196,13 +196,16 @@ async def post_findings_raw(upload_findings: List[UploadNewFindingModelRaw] = Bo
 async def post_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm = Depends(), token=Depends(auth.oauth2scheme)):
     if await auth.is_authenticated(token=token):
         try:
-            new_file = await upload_new_finding_file(file_meta_data=file_meta_data, new_file=new_file)
+            new_file = await upload_new_finding_file(new_file=new_file)
             if new_file:
                 logger.debug("New file uploaded")
                 return SimpleResponseModel(data=new_file, code=201, message='File was created successfully')
             else:
                 logger.debug("Could not upload new file")
         except ValueError as e:
+            logger.debug("An exception occured uploading new file: {}".format(str(e)))
+            raise HTTPException(status_code=422, detail='Unprocessable Entity -> {}'.format(e))
+        except OSError as e:
             logger.debug("An exception occured uploading new file: {}".format(str(e)))
             raise HTTPException(status_code=422, detail='Unprocessable Entity -> {}'.format(e))
     else:
