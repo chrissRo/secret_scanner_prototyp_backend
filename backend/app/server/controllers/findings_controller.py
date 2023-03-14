@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os.path
@@ -10,10 +11,10 @@ from utils import helpers
 from ..database import findings_collection
 # https://stackoverflow.com/questions/71467630/fastapi-issues-with-mongodb-typeerror-objectid-object-is-not-iterable
 from app.server.models.finding_models.finding_model import FindingModel, \
-    UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModelRaw, \
-    UploadNewFindingModelForm
+    UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModelRaw
 
 logger = logging.getLogger(__name__)
+
 
 #####################################
 # GET
@@ -63,6 +64,7 @@ async def retrieve_all_favourite_findings() -> list:
     logger.debug("Found {} favourite-findings in DB".format(len(findings)))
     return findings
 
+
 async def retrieve_all_true_positives() -> list:
     findings = []
 
@@ -73,6 +75,7 @@ async def retrieve_all_true_positives() -> list:
         findings.append(repo)
     logger.debug("Found {} true-positive findings in DB".format(len(findings)))
     return findings
+
 
 async def retrieve_overview_data() -> list:
     overview = []
@@ -168,11 +171,11 @@ async def upload_new_findings(new_findings: List[UploadNewFindingModelRaw]):
         logger.debug('Could not clear input directory -> {}'.format(e))
 
 
-async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm):
+async def upload_new_finding_file(new_file: UploadFile):
     try:
         helpers.clear_input_directory()
-        file_name = '{}__{}__{}.json'.format(file_meta_data.scanDate, file_meta_data.repositoryName,
-                                             file_meta_data.repositoryPath)
+        file_name = "{}.json".format(datetime.datetime.now())
+        logger.debug("Creating new file for input processing {}".format(file_name))
         async with aiofiles.open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='wb') as out_file:
             file_content = await new_file.read()
             await out_file.write(file_content)
@@ -184,4 +187,5 @@ async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNe
             logger.debug("Expected list-input")
             raise ValueError('Expected list-input')
     except OSError as e:
-        logger.debug('Could not clear input directory -> {}'.format(e))
+        logger.debug('Could not process input -> {}'.format(e))
+        raise OSError('Could not process input')
