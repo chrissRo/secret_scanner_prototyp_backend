@@ -1,4 +1,5 @@
 import json
+import logging
 import os.path
 from typing import List
 import aiofiles as aiofiles
@@ -12,6 +13,7 @@ from app.server.models.finding_models.finding_model import FindingModel, \
     UpdateFindingModelFalsePositive, UpdateFindingModelFavourite, UploadNewFindingModelRaw, \
     UploadNewFindingModelForm
 
+logger = logging.getLogger(__name__)
 
 #####################################
 # GET
@@ -22,14 +24,16 @@ async def retrieve_all_findings() -> list:
     findings = []
     async for finding in findings_collection.find():
         findings.append(finding)
+    logger.debug("Found {} findings in DB".format(len(findings)))
     return findings
 
 
-# oder nur hinterlegte false-positive
+# specific list of findings
 async def retrieve_findings(findings_ids: list) -> list:
     findings = []
     for finding_id in findings_ids:
         findings.append(await retrieve_single_finding(finding_id))
+    logger.debug("Found {} findings for {} provided Ids".format(len(findings), len(findings_ids)))
     return findings
 
 
@@ -44,6 +48,7 @@ async def retrieve_all_findings_for_repository(repository_id: str) -> list:
 
     async for finding in findings_collection.find({'repositoryName': repository_id}):
         findings.append(finding)
+    logger.debug("Found {} findings for repository-id {}".format(len(findings), repository_id))
     return sorted(findings, key=lambda d: (d['resultRaw']['Commit'].casefold(), d['resultRaw']['File']))
 
 
@@ -55,6 +60,7 @@ async def retrieve_all_favourite_findings() -> list:
         {'$sort': {'repositoryName': 1}}
     ]):
         findings.append(repo)
+    logger.debug("Found {} favourite-findings in DB".format(len(findings)))
     return findings
 
 async def retrieve_all_true_positives() -> list:
@@ -65,7 +71,9 @@ async def retrieve_all_true_positives() -> list:
         {'$sort': {'repositoryName': 1}}
     ]):
         findings.append(repo)
+    logger.debug("Found {} true-positive findings in DB".format(len(findings)))
     return findings
+
 async def retrieve_overview_data() -> list:
     overview = []
     async for repo in findings_collection.aggregate([{"$group": {"_id": "$repositoryName"}}]):
@@ -153,13 +161,11 @@ async def upload_new_findings(new_findings: List[UploadNewFindingModelRaw]):
         helpers.clear_input_directory()
         for new_finding in jsonable_encoder(new_findings):
             file_name = '{}__{}.json'.format(new_finding['scanDate'], new_finding['repositoryName'])
-            print(jsonable_encoder(new_finding))
+            logger.debug(jsonable_encoder(new_finding))
             with open(file=os.path.join(GitleaksConfig.FS_RAW_INPUT_PATH, file_name), mode='w') as f:
                 json.dump(new_finding['resultRaw'], f)
-            # führe den Scan-Manager aus wie in der main.py
-            # eigener API-Call um Zwischenergebnis zurückliefern zu können GET zB
     except OSError as e:
-        print('Could not clear input directory -> {}'.format(e))
+        logger.debug('Could not clear input directory -> {}'.format(e))
 
 
 async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNewFindingModelForm):
@@ -175,6 +181,7 @@ async def upload_new_finding_file(new_file: UploadFile, file_meta_data: UploadNe
         if isinstance(data, list):
             return file_name
         else:
+            logger.debug("Expected list-input")
             raise ValueError('Expected list-input')
     except OSError as e:
-        print('Could not clear input directory -> {}'.format(e))
+        logger.debug('Could not clear input directory -> {}'.format(e))

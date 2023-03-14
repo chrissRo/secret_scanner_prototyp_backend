@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timedelta
 
@@ -12,6 +13,7 @@ from app.server.controllers import user_controller
 from app.server.models.user_models.user import UserPublicModel
 from config.config import JWTConfig
 
+logger = logging.getLogger(__name__)
 
 class Auth:
     @property
@@ -31,7 +33,9 @@ class Auth:
         self.jwt_expiration_time_mins = JWTConfig.ACCESS_TOKEN_EXPIRE_MINUTES
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return self._pwd_context.verify(plain_password, hashed_password)
+        ret_val = self._pwd_context.verify(plain_password, hashed_password)
+        logger.debug("Verifying password: {}".format(ret_val))
+        return ret_val
 
     def get_password_hash(self, plain_password) -> str:
         return self._pwd_context.hash(plain_password)
@@ -39,9 +43,13 @@ class Auth:
     async def authenticate_user(self, username: str, password: str) -> UserPublicModel:
         user = await user_controller.retrieve_single_user_private(username=username)
         if user:
+            logger.debug("Found user {} in DB".format(user))
             if self.verify_password(plain_password=password, hashed_password=user['password']):
                 return UserPublicModel(username=user['username'], email=user['email'], active=user['active'])
-        # Todo Error Handling
+            else:
+                logger.debug("Password verification failed. User {} not authenticated".format(user))
+        else:
+            logger.debug("User {} invalid. Not found in DB".format(user))
 
     def create_access_token(self, json_web_token: dict) -> dict:
         json_web_token.update({
@@ -62,15 +70,21 @@ class Auth:
         )
         username = payload.get("sub")
         if username:
+            logger.debug("User {} from JWT".format(username))
             return await user_controller.retrieve_single_user(username=username)
+        else:
+            logger.debug("Could not extract user from JWT")
 
     async def is_authenticated(self, token: jwt) -> bool:
         try:
             current_user = await self.get_current_user(token=token)
             if current_user and current_user['active']:
+                logger.debug("User {} authenticated".format(current_user))
                 return True
+            logger.debug("User not authenticated")
             return False
         except ExpiredSignatureError:
+            logger.debug("Provided JWT is expired")
             raise HTTPException(status_code=403, detail='token expired')
 
 
