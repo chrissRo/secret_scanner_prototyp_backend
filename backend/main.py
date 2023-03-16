@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def init():
     if not(os.path.exists(GitleaksConfig.FS_RAW_INPUT_PATH)):
         logging.debug("Creating input-dir {}".format(GitleaksConfig.FS_RAW_INPUT_PATH))
-        os.mkdir(GitleaksConfig.FS_RAW_INPUT_PATH)
+        os.makedirs(GitleaksConfig.FS_RAW_INPUT_PATH)
     else:
         logging.debug("Input-dir {} already exists".format(GitleaksConfig.FS_RAW_INPUT_PATH))
 
