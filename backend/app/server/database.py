@@ -10,8 +10,12 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 try:
-    mongo_details = f"mongodb://{os.getenv('MONGODB_USER')}:{os.getenv('MONGODB_PASSWORD')}@localhost:27017" \
+    # mongo_details = f"mongodb://{os.getenv('MONGODB_USER')}:{os.getenv('MONGODB_PASSWORD')}@localhost:27017" \
+    #                f"/?authMechanism=DEFAULT "
+
+    mongo_details = f"mongodb://{os.getenv('MONGODB_USER')}:{os.getenv('MONGODB_PASSWORD')}@mongodb_container:27017" \
                     f"/?authMechanism=DEFAULT "
+
     if mongo_details:
         logger.debug("Connecting to database successful")
     else:
@@ -21,6 +25,7 @@ except ServerSelectionTimeoutError as e:
     logger.debug("Will try again with localhost")
     mongo_details = f"mongodb://{os.getenv('MONGODB_USER')}:{os.getenv('MONGODB_PASSWORD')}@mongodb_container:27017" \
                     f"/?authMechanism=DEFAULT "
+
 
 db_client = motor.motor_asyncio.AsyncIOMotorClient(mongo_details)
 if db_client:
