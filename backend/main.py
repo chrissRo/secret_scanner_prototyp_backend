@@ -23,8 +23,6 @@ def init():
 
 if __name__ == "__main__":
 
-    init()
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--start-webserver', required=False, help='Start uvicorn webserver', action='store_true')
     parser.add_argument('--bulk-upload', required=False, help='Start bulk-upload of data', action='store_true')
@@ -35,6 +33,7 @@ if __name__ == "__main__":
         filemode=LoggerConfig.FILE_MODE,
         format=LoggerConfig.LOG_FORMAT
     )
+    init()
 
     args = parser.parse_args()
 
