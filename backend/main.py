@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import datetime
 import logging
+import os.path
 import sys
 
 import uvicorn
@@ -10,9 +11,19 @@ from app.globals.global_config import AvailableScanner, InputType
 from app.server.fs_scan_results.fs_scan_results_manager import FSScanResultsManager
 from app.server.models.finding_models.finding_model import UploadNewFindingModel
 from app.user.user_manager import UserManager
-from config.config import LoggerConfig
+from config.config import LoggerConfig, GitleaksConfig
+
+
+def init():
+    if not(os.path.exists(GitleaksConfig.FS_RAW_INPUT_PATH)):
+        logging.debug("Creating input-dir {}".format(GitleaksConfig.FS_RAW_INPUT_PATH))
+    else:
+        logging.debug("Input-dir {} already exists".format(GitleaksConfig.FS_RAW_INPUT_PATH))
+
 
 if __name__ == "__main__":
+
+    init()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--start-webserver', required=False, help='Start uvicorn webserver', action='store_true')
