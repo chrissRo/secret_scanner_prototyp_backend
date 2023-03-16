@@ -10,12 +10,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config.config import LoggerConfig
 
-#logging.basicConfig(
-#    level=LoggerConfig.LOG_LEVEL,
-#    filename=LoggerConfig.LOG_FILE,
-#    filemode=LoggerConfig.FILE_MODE,
-#    format=LoggerConfig.LOG_FORMAT
-#)
+logging.basicConfig(
+    level=LoggerConfig.LOG_LEVEL,
+    filename=LoggerConfig.LOG_FILE,
+    filemode=LoggerConfig.FILE_MODE,
+    format=LoggerConfig.LOG_FORMAT
+)
 
 logger = logging.getLogger(__name__)
 
