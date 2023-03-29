@@ -36,7 +36,7 @@ app.add_middleware(
 
 app.include_router(FindingRouter, tags=["Finding"], prefix='/finding')
 app.include_router(UserRouter, tags=["User"], prefix='/user')
-app.include_router(LoginRouter, tags=['Login', 'GetAccessToken'], prefix='/token')
+app.include_router(LoginRouter, tags=['Login'], prefix='/token')
 app.include_router(MiscRouter, tags=['Miscellaneous'], prefix='/misc')
 app.include_router(ScanManagerRouter, tags=['ScanManager'], prefix='/scan_manager')
 
