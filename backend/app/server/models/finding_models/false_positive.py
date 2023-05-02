@@ -6,7 +6,7 @@ from config.config import InitialModelValue
 
 class FalsePositiveModel(BaseModel):
 
-    isFalsePositive: StrictBool = False
+    isFalsePositive: StrictBool = True
     justification: str = Field(...)
     change_date: datetime = InitialModelValue.CHANGE_DATE
     
