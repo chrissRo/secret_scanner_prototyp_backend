@@ -58,7 +58,8 @@ class FSScanResultsManager:
 
     async def run(self, meta_data: UploadNewFindingModel, file=None, repository_hoster=None) -> [{}]:
         self._file_meta_data = meta_data
-        self._repository_hoster = repository_hoster
+        if repository_hoster:
+            self._repository_hoster = repository_hoster
         if self._file_meta_data.scannerType.value == AvailableScanner.GITLEAKS.value:
             logger.debug("AvailableScanner is Gitleaks")
             self._scanner = AvailableScanner.GITLEAKS
@@ -142,11 +143,13 @@ class FSScanResultsManager:
             try:
                 data = json.load(f)
                 if data:
-                    path_parts = pathlib.Path(file).parts
-                    self._file_meta_data.repositoryName = path_parts[-1].split(".")[0]
+                    if self._file_meta_data.repositoryPath and self._file_meta_data.repositoryName:
+                        path_parts = pathlib.Path(file).parts
+                        self._file_meta_data.repositoryName = path_parts[-1].split(".")[0]
+                        self._file_meta_data.repositoryPath = os.path.join(self._repository_hoster, path_parts[-2],
+                                                                           self._file_meta_data.repositoryName)
                     logger.debug(
                         "Found valid JSON in file {}. Repository is {}".format(f, self._file_meta_data.repositoryName))
-                    self._file_meta_data.repositoryPath = os.path.join(self._repository_hoster, path_parts[-2], self._file_meta_data.repositoryName)
                     self._raw_results.append({
                         "scan_date": str(self._file_meta_data.scanDate),
                         "repo_name": self._file_meta_data.repositoryName,
