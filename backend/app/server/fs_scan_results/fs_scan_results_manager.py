@@ -9,11 +9,10 @@ from app.globals.global_config import AvailableScanner, InputType
 from app.server import database
 from app.server.database import findings_collection
 from app.server.models.finding_models.false_positive import FalsePositiveModel
-from app.server.models.finding_models.finding_model import FindingModel,\
+from app.server.models.finding_models.finding_model import FindingModel, \
     UploadNewFindingModel
 from app.server.models.finding_models.gitleaks_raw_result import GitleaksRawResultModel
 from config.config import GitleaksConfig, InitialModelValue
-
 
 """
 speichere nur Einträge in die Datenbank, die dort noch nicht als false-positive hinterlegt wurden 
@@ -21,6 +20,7 @@ anschließend können die neuen Ergebnisse für eine Evaluierung bereitgestellt 
 """
 
 logger = logging.getLogger(__name__)
+
 
 class FSScanResultsManager:
     _raw_results = []
@@ -89,7 +89,8 @@ class FSScanResultsManager:
             return run_result
         else:
             # Todo Error Handling
-            logger.debug("Invalid AvailableScanner provided. Value was {} -> Skipping step ...".format(self._file_meta_data.scannerType.value))
+            logger.debug("Invalid AvailableScanner provided. Value was {} -> Skipping step ...".format(
+                self._file_meta_data.scannerType.value))
             self.cleanup()
             raise ValueError("Invalid AvailableScanner provided")
 
@@ -111,28 +112,35 @@ class FSScanResultsManager:
 
     def read_raw_input(self):
         raw_json_files = []
-        try:
-            raw_files = [f for f in os.listdir(self._raw_input_path) if
-                         os.path.isfile(os.path.join(self._raw_input_path, f))]
-            logger.debug("Processing following directories: {}".format(raw_files))
-            # filter for json
-            logger.debug("Try reading {} raw files".format(len(raw_files)))
-            raw_json_files = [f for f in raw_files if pathlib.Path(f).suffix == GitleaksConfig.FS_RAW_INPUT_FILE_TYPE]
-            logger.debug("Try reading {} raw JSON files".format(len(raw_json_files)))
-        except FileNotFoundError as e:
-            # Todo Error Handling
-            logger.debug("File not found")
-            logger.debug(e)
 
+        for root, _, files in os.walk(self._raw_input_path):
+            try:
+                for raw_file in files:
+
+                    # filter for json
+                    if pathlib.Path(raw_file).suffix == GitleaksConfig.FS_RAW_INPUT_FILE_TYPE:
+                        raw_json_files.append(os.path.join(root, raw_file))
+                        logger.debug("Current file is: {}".format(os.path.join(root, raw_file)))
+
+            except FileNotFoundError as e:
+                # Todo Error Handling
+                logger.debug("File not found")
+                logger.debug(e)
+
+        logger.debug("Collected {} files for further processing".format(len(raw_json_files)))
         for file in raw_json_files:
             self.read_file(file=file)
 
     def read_file(self, file):
-        with open(file=os.path.join(self._raw_input_path, file), mode='r') as f:
+        if not os.path.dirname(file):
+            file = os.path.join(self._raw_input_path, file)
+
+        with open(file=file, mode='r') as f:
             try:
                 data = json.load(f)
                 if data:
-                    logger.debug("Found valid JSON in file {}. Repository is {}".format(f, self._file_meta_data.repositoryName))
+                    logger.debug(
+                        "Found valid JSON in file {}. Repository is {}".format(f, self._file_meta_data.repositoryName))
                     self._raw_results.append({
                         "scan_date": str(self._file_meta_data.scanDate),
                         "repo_name": self._file_meta_data.repositoryName,
@@ -197,7 +205,8 @@ class FSScanResultsManager:
                                                                   inputType=InputType.FileSystem,
                                                                   repositoryPath=scan['repo_path'],
                                                                   repositoryName=scan["repo_name"],
-                                                                  scanStartTime=datetime.fromisoformat(scan["scan_date"]),
+                                                                  scanStartTime=datetime.fromisoformat(
+                                                                      scan["scan_date"]),
                                                                   scanEndTime=datetime.fromisoformat(scan["scan_date"]),
                                                                   resultRaw=GitleaksRawResultModel(
                                                                       **raw_result),
