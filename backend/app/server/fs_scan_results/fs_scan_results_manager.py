@@ -147,7 +147,6 @@ class FSScanResultsManager:
                     logger.debug(
                         "Found valid JSON in file {}. Repository is {}".format(f, self._file_meta_data.repositoryName))
                     self._file_meta_data.repositoryPath = os.path.join(self._repository_hoster, path_parts[-2], self._file_meta_data.repositoryName)
-                    print("Github-Link: {}".format(self._file_meta_data.repositoryPath))
                     self._raw_results.append({
                         "scan_date": str(self._file_meta_data.scanDate),
                         "repo_name": self._file_meta_data.repositoryName,
