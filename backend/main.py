@@ -15,8 +15,9 @@ from config.config import LoggerConfig, GitleaksConfig
 
 logger = logging.getLogger(__name__)
 
+
 def init():
-    if not(os.path.exists(GitleaksConfig.FS_RAW_INPUT_PATH)):
+    if not (os.path.exists(GitleaksConfig.FS_RAW_INPUT_PATH)):
         logging.debug("Creating input-dir {}".format(GitleaksConfig.FS_RAW_INPUT_PATH))
         os.makedirs(GitleaksConfig.FS_RAW_INPUT_PATH)
     else:
@@ -28,6 +29,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--start-webserver', required=False, help='Start uvicorn webserver', action='store_true')
     parser.add_argument('--bulk-upload', required=False, help='Start bulk-upload of data', action='store_true')
+    parser.add_argument('--repository-hoster', required=False, help="Provide the hoster of your repository, e.g. 'https://github.com'")
 
     logging.basicConfig(
         level=LoggerConfig.LOG_LEVEL,
@@ -65,7 +67,9 @@ if __name__ == "__main__":
                 scannerType=AvailableScanner.GITLEAKS,
                 scannerVersion='8.15',
                 inputType=InputType.FileSystem,
-                repositoryPath=".",
-                repositoryName='Manual-import',
+                repositoryPath="",
+                repositoryName="",
                 scanDate=datetime.datetime.now()
-            )))
+            ),
+                repository_hoster=args.repository_hoster
+            ))
