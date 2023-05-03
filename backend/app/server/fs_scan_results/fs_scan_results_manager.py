@@ -36,6 +36,7 @@ class FSScanResultsManager:
     _scanner_version = ''
     _file_meta_data = {}
     _repository_hoster = ''
+    _bulk_upload: bool
 
     def __init__(self):
         self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
@@ -56,8 +57,10 @@ class FSScanResultsManager:
         self._scanner_version = ''
         self._repository_hoster = ''
 
-    async def run(self, meta_data: UploadNewFindingModel, file=None, repository_hoster=None) -> [{}]:
+    async def run(self, meta_data: UploadNewFindingModel, file=None, repository_hoster=None, bulk_upload=False) -> [{}]:
         self._file_meta_data = meta_data
+        self._bulk_upload = bulk_upload
+        logger.debug("Bulk-Upload set to {}".format(str(self._bulk_upload)))
         if repository_hoster:
             self._repository_hoster = repository_hoster
         if self._file_meta_data.scannerType.value == AvailableScanner.GITLEAKS.value:
@@ -136,14 +139,14 @@ class FSScanResultsManager:
             self.read_file(file=file)
 
     def read_file(self, file):
-        if not os.path.dirname(file):
+        if not self._bulk_upload:
             file = os.path.join(self._raw_input_path, file)
 
         with open(file=file, mode='r') as f:
             try:
                 data = json.load(f)
                 if data:
-                    if not self._file_meta_data.repositoryPath and not self._file_meta_data.repositoryName:
+                    if self._bulk_upload:
                         path_parts = pathlib.Path(file).parts
                         self._file_meta_data.repositoryName = path_parts[-1].split(".")[0]
                         self._file_meta_data.repositoryPath = os.path.join(self._repository_hoster, path_parts[-2],
