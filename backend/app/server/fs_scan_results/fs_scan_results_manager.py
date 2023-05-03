@@ -143,7 +143,7 @@ class FSScanResultsManager:
             try:
                 data = json.load(f)
                 if data:
-                    if self._file_meta_data.repositoryPath and self._file_meta_data.repositoryName:
+                    if not self._file_meta_data.repositoryPath and not self._file_meta_data.repositoryName:
                         path_parts = pathlib.Path(file).parts
                         self._file_meta_data.repositoryName = path_parts[-1].split(".")[0]
                         self._file_meta_data.repositoryPath = os.path.join(self._repository_hoster, path_parts[-2],
