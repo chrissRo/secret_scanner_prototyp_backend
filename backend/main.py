@@ -71,5 +71,6 @@ if __name__ == "__main__":
                 repositoryName="",
                 scanDate=datetime.datetime.now()
             ),
-                repository_hoster=args.repository_hoster
+                repository_hoster=args.repository_hoster,
+                bulk_upload=True
             ))
