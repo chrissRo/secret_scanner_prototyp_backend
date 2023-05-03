@@ -35,6 +35,7 @@ class FSScanResultsManager:
     _scanner = ''
     _scanner_version = ''
     _file_meta_data = {}
+    _repository_hoster = ''
 
     def __init__(self):
         self._raw_input_path = GitleaksConfig.FS_RAW_INPUT_PATH
@@ -53,9 +54,12 @@ class FSScanResultsManager:
         self._findings_ids.clear()
         self._scanner = ''
         self._scanner_version = ''
+        self._repository_hoster = ''
 
-    async def run(self, meta_data: UploadNewFindingModel, file=None) -> [{}]:
+    async def run(self, meta_data: UploadNewFindingModel, file=None, repository_hoster=None) -> [{}]:
         self._file_meta_data = meta_data
+        if repository_hoster:
+            self._repository_hoster = repository_hoster
         if self._file_meta_data.scannerType.value == AvailableScanner.GITLEAKS.value:
             logger.debug("AvailableScanner is Gitleaks")
             self._scanner = AvailableScanner.GITLEAKS
@@ -139,6 +143,11 @@ class FSScanResultsManager:
             try:
                 data = json.load(f)
                 if data:
+                    if not self._file_meta_data.repositoryPath and not self._file_meta_data.repositoryName:
+                        path_parts = pathlib.Path(file).parts
+                        self._file_meta_data.repositoryName = path_parts[-1].split(".")[0]
+                        self._file_meta_data.repositoryPath = os.path.join(self._repository_hoster, path_parts[-2],
+                                                                           self._file_meta_data.repositoryName)
                     logger.debug(
                         "Found valid JSON in file {}. Repository is {}".format(f, self._file_meta_data.repositoryName))
                     self._raw_results.append({
