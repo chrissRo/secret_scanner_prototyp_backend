@@ -114,6 +114,7 @@ class FSScanResultsManager:
         try:
             raw_files = [f for f in os.listdir(self._raw_input_path) if
                          os.path.isfile(os.path.join(self._raw_input_path, f))]
+            logger.debug("Processing following directories: {}".format(raw_files))
             # filter for json
             logger.debug("Try reading {} raw files".format(len(raw_files)))
             raw_json_files = [f for f in raw_files if pathlib.Path(f).suffix == GitleaksConfig.FS_RAW_INPUT_FILE_TYPE]
