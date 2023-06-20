@@ -1,0 +1,79 @@
+INFO     | 2023-06-20 13:23:45,314 | 353  - __init__                                 | Will watch for changes in these directories: ['/home/chriss/Repositories/secret_scanner_prototyp_backend/backend']
+INFO     | 2023-06-20 13:23:45,314 | 581  - bind_socket                              | Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO     | 2023-06-20 13:23:45,314 | 72   - startup                                  | Started reloader process [16834] using StatReload
+INFO     | 2023-06-20 13:23:45,722 | 75   - serve                                    | Started server process [16844]
+INFO     | 2023-06-20 13:23:45,723 | 47   - startup                                  | Waiting for application startup.
+INFO     | 2023-06-20 13:23:45,723 | 61   - startup                                  | Application startup complete.
+INFO     | 2023-06-20 13:23:48,555 | 480  - send                                     | 127.0.0.1:50608 - "OPTIONS /token/ HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:48,870 | 480  - send                                     | 127.0.0.1:50608 - "POST /token/ HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:48,979 | 480  - send                                     | 127.0.0.1:50608 - "OPTIONS /finding/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:48,979 | 480  - send                                     | 127.0.0.1:50616 - "OPTIONS /finding/overview HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:48,991 | 480  - send                                     | 127.0.0.1:50616 - "GET /finding/overview HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:48,992 | 480  - send                                     | 127.0.0.1:50608 - "GET /finding/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,061 | 480  - send                                     | 127.0.0.1:50616 - "OPTIONS /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,077 | 480  - send                                     | 127.0.0.1:50608 - "OPTIONS /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,084 | 480  - send                                     | 127.0.0.1:50608 - "GET /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,087 | 480  - send                                     | 127.0.0.1:50626 - "OPTIONS /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,093 | 480  - send                                     | 127.0.0.1:50626 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,097 | 480  - send                                     | 127.0.0.1:50632 - "OPTIONS /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,103 | 480  - send                                     | 127.0.0.1:50632 - "GET /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,108 | 480  - send                                     | 127.0.0.1:50638 - "OPTIONS /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,109 | 480  - send                                     | 127.0.0.1:50616 - "GET /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:23:49,114 | 480  - send                                     | 127.0.0.1:50638 - "GET /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:00,362 | 480  - send                                     | 127.0.0.1:56108 - "GET /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:00,363 | 480  - send                                     | 127.0.0.1:56108 - "OPTIONS /finding/repository/auth0-config-migrator HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:00,447 | 480  - send                                     | 127.0.0.1:56108 - "GET /finding/repository/auth0-config-migrator HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:06,760 | 480  - send                                     | 127.0.0.1:56122 - "GET /finding/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:06,761 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/overview HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:06,869 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:06,883 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:06,894 | 480  - send                                     | 127.0.0.1:56122 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:06,906 | 480  - send                                     | 127.0.0.1:56122 - "GET /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:06,916 | 480  - send                                     | 127.0.0.1:56128 - "GET /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:08,359 | 480  - send                                     | 127.0.0.1:56122 - "OPTIONS /finding/repository/cfn-cloudtrail HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:08,361 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:08,365 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/cfn-cloudtrail HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:12,354 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:12,355 | 480  - send                                     | 127.0.0.1:56122 - "GET /finding/overview HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:12,428 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:12,438 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:12,449 | 480  - send                                     | 127.0.0.1:56122 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:12,463 | 480  - send                                     | 127.0.0.1:56122 - "GET /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:12,472 | 480  - send                                     | 127.0.0.1:52374 - "GET /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:13,870 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:13,874 | 480  - send                                     | 127.0.0.1:56126 - "OPTIONS /finding/repository/cfn-ecs-cluster HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:13,945 | 480  - send                                     | 127.0.0.1:56126 - "GET /finding/repository/cfn-ecs-cluster HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:29,407 | 480  - send                                     | 127.0.0.1:59274 - "GET /finding/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:29,409 | 480  - send                                     | 127.0.0.1:59282 - "GET /finding/overview HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:29,477 | 480  - send                                     | 127.0.0.1:59282 - "GET /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:29,491 | 480  - send                                     | 127.0.0.1:59282 - "GET /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:29,502 | 480  - send                                     | 127.0.0.1:59274 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:29,512 | 480  - send                                     | 127.0.0.1:59274 - "GET /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:29,522 | 480  - send                                     | 127.0.0.1:59292 - "GET /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:33,720 | 480  - send                                     | 127.0.0.1:59274 - "GET /finding/repository/cfn-ecs-cluster HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:33,723 | 480  - send                                     | 127.0.0.1:59282 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:42,817 | 480  - send                                     | 127.0.0.1:60378 - "GET /finding/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:42,818 | 480  - send                                     | 127.0.0.1:60390 - "GET /finding/overview HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:42,899 | 480  - send                                     | 127.0.0.1:60390 - "GET /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:42,908 | 480  - send                                     | 127.0.0.1:60390 - "GET /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:42,921 | 480  - send                                     | 127.0.0.1:60378 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:42,930 | 480  - send                                     | 127.0.0.1:60378 - "GET /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:42,944 | 480  - send                                     | 127.0.0.1:60392 - "GET /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:45,612 | 480  - send                                     | 127.0.0.1:60390 - "GET /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:45,617 | 480  - send                                     | 127.0.0.1:60390 - "OPTIONS /finding/repository/cfn-ecs-service HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:45,680 | 480  - send                                     | 127.0.0.1:60390 - "GET /finding/repository/cfn-ecs-service HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:57,726 | 480  - send                                     | 127.0.0.1:51144 - "GET /finding/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:57,727 | 480  - send                                     | 127.0.0.1:51154 - "GET /finding/overview HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:57,795 | 480  - send                                     | 127.0.0.1:51154 - "GET /finding/repository/auth0-config-migrator/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:57,813 | 480  - send                                     | 127.0.0.1:51154 - "GET /finding/repository/cfn-cloudtrail/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:57,822 | 480  - send                                     | 127.0.0.1:51144 - "GET /finding/repository/cfn-ecs-cluster/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:57,831 | 480  - send                                     | 127.0.0.1:51144 - "GET /finding/repository/cfn-ecs-service/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:57,841 | 480  - send                                     | 127.0.0.1:51170 - "GET /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:59,647 | 480  - send                                     | 127.0.0.1:51144 - "OPTIONS /finding/repository/cfn-ecs-service-v2 HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:59,649 | 480  - send                                     | 127.0.0.1:51154 - "GET /finding/repository/cfn-ecs-service-v2/count HTTP/1.1" 200
+INFO     | 2023-06-20 13:24:59,653 | 480  - send                                     | 127.0.0.1:51144 - "GET /finding/repository/cfn-ecs-service-v2 HTTP/1.1" 200
+INFO     | 2023-06-20 13:25:27,679 | 255  - shutdown                                 | Shutting down
+INFO     | 2023-06-20 13:25:27,780 | 66   - shutdown                                 | Waiting for application shutdown.
+INFO     | 2023-06-20 13:25:27,780 | 77   - shutdown                                 | Application shutdown complete.
+INFO     | 2023-06-20 13:25:27,781 | 85   - serve                                    | Finished server process [16844]
+INFO     | 2023-06-20 13:25:28,240 | 103  - shutdown                                 | Stopping reloader process [16834]
