@@ -147,10 +147,9 @@ class FSScanResultsManager:
                 data = json.load(f)
                 if data:
                     if self._bulk_upload:
-                        path_parts = pathlib.Path(file).parts
-                        self._file_meta_data.repositoryName = path_parts[-1].split(".")[0]
-                        self._file_meta_data.repositoryPath = os.path.join(self._repository_hoster, path_parts[-2],
-                                                                           self._file_meta_data.repositoryName)
+                        full_path = pathlib.Path(file)
+                        self._file_meta_data.repositoryName = full_path.stem # path_parts[-1].split(".")[0]
+                        self._file_meta_data.repositoryPath = f"{self._repository_hoster}{str(full_path.parent).split(GitleaksConfig.FS_RAW_INPUT_PATH)[1]}"
                     logger.debug(
                         "Found valid JSON in file {}. Repository is {}".format(f, self._file_meta_data.repositoryName))
                     self._raw_results.append({
